@@ -2,7 +2,7 @@
 # Reads a fortigate config and exports commands to append the rules to an existing AzFW Policy
 #
 # Example:
-# python ./read_fortigate_config.py ./fortigate_output.txt
+# python ./read_fortigate_config.py --file ./fortigate_output.txt --format azcli
 # az network firewall policy rule-collection-group collection rule add --name 1073742000 --source-addresses 10.15.5.20/32 10.15.5.40/32 10.15.5.30/32 10.15.5.50/32 10.5.22.140/32 10.5.22.145/32 10.5.22.150/32 10.5.22.155/32 --destination-addresses 10.10.40.21/32 10.10.40.22/32 --protocols tcp udp --destination-ports 288 33434
 # az network firewall policy rule-collection-group collection rule add --name 1073742041 --source-addresses 10.15.5.40/32 10.15.5.50/32 10.5.22.140/32 10.5.22.150/32 --destination-addresses 10.10.40.21/32 10.10.40.22/32 --protocols tcp udp --destination-ports 22
 #
@@ -132,7 +132,7 @@ with open(file_name) as fp:
                             if verbose:
                                 print ("Adding IP range", ip_range, "to destination addresses")
                     # If the line is just a FQDN (10.0.0.0/8), see whether to put it in srcaddr or dstaddr, depending on whether srcaddr is already a key
-                    # Since we have no access to schindler's DNS, I will generate random IP addresses here
+                    # Since we have no access to the internal DNS, I will generate random IP addresses here (this is a PoC!!!!!)
                     m = re.match('^([\w|\.]+)$', line)
                     if m:
                         # If srcaddr is already a key, it means we are now looking at it
