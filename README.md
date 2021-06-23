@@ -1,4 +1,4 @@
-# Convert test to Azure code
+# Converting text-based configs to Azure code
 
 The purpose of this repo is providing an example that illustrates a possibility to convert configuration files from disparate sources to code that can be imported into Azure.
 
