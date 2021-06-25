@@ -2,7 +2,7 @@
 # Reads a fortigate config and exports commands to append the rules to an existing AzFW Policy
 #
 # Example:
-# python ./read_fortigate_config.py --file ./fortigate_output.txt --format azcli
+# python ./read_fortigate_config.py ./fortigate_output.txt
 # az network firewall policy rule-collection-group collection rule add --name 1073742000 --source-addresses 10.15.5.20/32 10.15.5.40/32 10.15.5.30/32 10.15.5.50/32 10.5.22.140/32 10.5.22.145/32 10.5.22.150/32 10.5.22.155/32 --destination-addresses 10.10.40.21/32 10.10.40.22/32 --protocols tcp udp --destination-ports 288 33434
 # az network firewall policy rule-collection-group collection rule add --name 1073742041 --source-addresses 10.15.5.40/32 10.15.5.50/32 10.5.22.140/32 10.5.22.150/32 --destination-addresses 10.10.40.21/32 10.10.40.22/32 --protocols tcp udp --destination-ports 22
 #
@@ -14,11 +14,23 @@ import sys
 import random
 import string
 import argparse
+import socket
 from types import prepare_class
 
 
 def netmask_to_cidr(m_netmask):
-  return(sum([ bin(int(bits)).count("1") for bits in m_netmask.split(".") ]))
+    try:
+        ip = socket.gethostbyname(d)
+        if ip:
+            return ip
+        else:
+            return(sum([ bin(int(bits)).count("1") for bits in m_netmask.split(".") ]))
+    except Exception:
+        # Return a random IP
+        return(sum([ bin(int(bits)).count("1") for bits in m_netmask.split(".") ]))
+
+def resolve_name(fqdn):
+    return str(random.randint(1,255)) + "." + str(random.randint(1,255)) + "." + str(random.randint(1,255)) + "." + str(random.randint(1,255)) + "/32"
 
 # Get input arguments
 parser = argparse.ArgumentParser(description='Get the latest flow logs in a storage account')
@@ -131,14 +143,14 @@ with open(file_name) as fp:
                             new_policy["dstaddr"].append(ip_range)
                             if verbose:
                                 print ("Adding IP range", ip_range, "to destination addresses")
-                    # If the line is just a FQDN (10.0.0.0/8), see whether to put it in srcaddr or dstaddr, depending on whether srcaddr is already a key
-                    # Since we have no access to the internal DNS, I will generate random IP addresses here (this is a PoC!!!!!)
+                    # If the line is just a FQDN (alphanumeric or dots), see whether to put it in srcaddr or dstaddr, depending on whether srcaddr is already a key
+                    # Since we have no access to schindler's DNS, I will generate random IP addresses here
                     m = re.match('^([\w|\.]+)$', line)
                     if m:
                         # If srcaddr is already a key, it means we are now looking at it
                         # Otherwise it needs to be dstaddr
                         fqdn = m.groups()[0]
-                        cidr = str(random.randint(1,255)) + "." + str(random.randint(1,255)) + "." + str(random.randint(1,255)) + "." + str(random.randint(1,255)) + "/32"
+                        cidr = resolve_name(fqdn)
                         if "srcaddr" in new_policy.keys():
                             new_policy["srcaddr"].append(cidr)
                             if verbose:
