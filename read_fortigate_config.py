@@ -2,7 +2,7 @@
 # Reads a fortigate config and exports commands to append the rules to an existing AzFW Policy
 #
 # Example:
-# python ./read_fortigate_config.py ./fortigate_output.txt
+# python ./read_fortigate_config.py --file ./fortigate_output.txt --format json
 # az network firewall policy rule-collection-group collection rule add --name 1073742000 --source-addresses 10.15.5.20/32 10.15.5.40/32 10.15.5.30/32 10.15.5.50/32 10.5.22.140/32 10.5.22.145/32 10.5.22.150/32 10.5.22.155/32 --destination-addresses 10.10.40.21/32 10.10.40.22/32 --protocols tcp udp --destination-ports 288 33434
 # az network firewall policy rule-collection-group collection rule add --name 1073742041 --source-addresses 10.15.5.40/32 10.15.5.50/32 10.5.22.140/32 10.5.22.150/32 --destination-addresses 10.10.40.21/32 10.10.40.22/32 --protocols tcp udp --destination-ports 22
 #
@@ -39,6 +39,24 @@ parser.add_argument('--file', dest='file_name', action='store',
 parser.add_argument('--format', dest='format', action='store',
                     default="azcli",
                     help='output format. Possible values: azcli (default), json')
+parser.add_argument('--min-rule', dest='min_rule', action='store', type=int,
+                    default=1,
+                    help='minimum rule number to include in the output. The default is 1 (start with 1st rule)')
+parser.add_argument('--max-rule', dest='max_rule', action='store', type=int,
+                    default=0,
+                    help='Max rule number to include in the output. The default is 0 (do not use a maximum)')
+parser.add_argument('--policy-name', dest='policy_name', action='store',
+                    default="jsonpolicy",
+                    help='Name for the Azure Firewall Policy. The default is "jsonpolicy"')
+parser.add_argument('--rcg-name', dest='rcg_name', action='store',
+                    default="fortinet",
+                    help='Name for the Rule Collection Group. The default is "fortinet"')
+parser.add_argument('--rcg-priority', dest='rcg_prio', action='store', type=int,
+                    default=1000,
+                    help='Priority for the generated Rule Collection Group. The default is 1000')
+parser.add_argument('--rules-per-collection', dest='rules_per_collection', action='store', type=int,
+                    default=10,
+                    help='Number of rules per collection. The default is 10')
 parser.add_argument('--verbose', dest='verbose', action='store_true',
                     default=False,
                     help='run in verbose mode (default: False)')
@@ -71,11 +89,11 @@ with open(file_name) as fp:
             # action
             m = re.match('action\W+(\w+)', line)
             if m:
-                if m.groups()[0] == "accept":
+                if m.groups()[0].lower() == "accept":
                     new_policy["action"] = "Allow"
                     if verbose:
                         print ("Adding Allow action")
-                elif m.groups()[0] == "drop":
+                elif m.groups()[0].lower() == "drop":
                     new_policy["action"] = "Deny"
                     if verbose:
                         print ("Adding Deny action")
@@ -211,10 +229,11 @@ if args.format == "azcli":
     rg = 'fortinet'
     location = 'westeurope'
     azfw_policy_name = 'mypolicy'
-    azfw_collection_group = 'fortinet'
+    azfw_collection_group = args.rcg_name
+    rcg_prio = args.rcg_prio
     print ("az group create -n {rg} -l {location}".format(rg=rg, location=location))
     print ("az network firewall policy create -n {azfw_policy_name} -g {rg}".format(azfw_policy_name=azfw_policy_name, rg=rg))
-    print ("az network firewall policy rule-collection-group create -n {azfw_collection_group} --policy-name {azfw_policy_name} -g {rg} --priority 1000".format(azfw_collection_group=azfw_collection_group, azfw_policy_name=azfw_policy_name, rg=rg))
+    print ("az network firewall policy rule-collection-group create -n {azfw_collection_group} --policy-name {azfw_policy_name} -g {rg} --priority {rcg_prio}".format(azfw_collection_group=azfw_collection_group, azfw_policy_name=azfw_policy_name, rg=rg, rcg_prio=rcg_prio))
 
     # Process generated rules
     priority = 1000
@@ -233,9 +252,12 @@ if args.format == "azcli":
 
 elif args.format == "json":
     rg = 'fortinet'
+    # api_version = "2020-11-01"
+    api_version = "2021-02-01"
     location = 'westeurope'
-    azfw_policy_name = 'jsonpolicy'
-    azfw_collection_group = 'fortinet'
+    azfw_policy_name = args.policy_name
+    azfw_collection_group = args.rcg_name
+    rcg_prio = args.rcg_prio
     template_header = """{
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
@@ -247,7 +269,7 @@ elif args.format == "json":
     template_footer="]}"
     policy_resource="""        {{
             "type": "Microsoft.Network/firewallPolicies",
-            "apiVersion": "2020-11-01",
+            "apiVersion": "{api_version}",
             "name": "{azfw_policy_name}",
             "location": "[variables('location')]",
             "properties": {{
@@ -259,22 +281,24 @@ elif args.format == "json":
         }},"""
     rcg_header = """        {{
             "type": "Microsoft.Network/firewallPolicies/ruleCollectionGroups",
-            "apiVersion": "2020-11-01",
+            "apiVersion": "{api_version}",
             "name": "{azfw_policy_name}/{rcg_name}",
             "location": "[variables('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/firewallPolicies', '{azfw_policy_name}'))]"
+                "[resourceId('Microsoft.Network/firewallPolicies', '{azfw_policy_name}')]"
             ],
             "properties": {{
-                "priority": 1000,
+                "priority": {rcg_prio},
                 "ruleCollections": ["""
-    rc = """{{
+    rc_header = """{{
                         "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
+                        "name": "{name}",
+                        "priority": {priority},
                         "action": {{
                             "type": "{action}"
                         }},
-                        "rules": [
-                            {{
+                        "rules": ["""
+    rule_json = """                            {{
                                 "ruleType": "NetworkRule",
                                 "name": "{name}",
                                 "ipProtocols": [
@@ -292,47 +316,70 @@ elif args.format == "json":
                                 "destinationPorts": [
                                     {dstports}
                                 ]
-                            }}
-                        ],
-                        "name": "{name}",
-                        "priority": {priority}
-                    }}"""
+                            }}"""
+    rc_footer = "                        ]}"
     rcg_footer = "] } }"
 
     print (template_header)
-    print (policy_resource.format(azfw_policy_name=azfw_policy_name))
-    print (rcg_header.format(azfw_policy_name=azfw_policy_name, rcg_name=azfw_collection_group))
+    print (policy_resource.format(azfw_policy_name=azfw_policy_name, api_version=api_version))
+    print (rcg_header.format(azfw_policy_name=azfw_policy_name, rcg_name=azfw_collection_group, rcg_prio=rcg_prio, api_version=api_version))
 
     # Go over the rules
     priority = 1000
+    rule_index = 1
+    output_rule_index = 1
+    collection_index = 1
     for rule in rules:
-        # If not the first rule, print a ',' to separate JSON objects
-        if priority != 1000:
-            print(',')
-        priority += 10
-        # If the only protocol is ICMP, open up all ports
-        if rule["protocols"] == ['icmp']:
-            rule["dstports"] = ['"*"']
-        # Replace single quotes with double quotes (in case there is another '*' in the port list)
-        rule['dstports'] = [str(item).replace("'", '"') for item in rule['dstports']]
-        # Add a random suffix to the policy name to make sure it is unique
-        random_suffix = ''.join(random.choices(string.ascii_letters + string.digits, k=4))
-        rule["name"] = rule["name"] + "-" + random_suffix
-        # If no action was detected, default to 'Accept'
-        if rule["action"] == "":
-            rule["action"] = "Accept"
-        # Send the JSON code to stdout
-        protocols = ['"' + item + '"' for item in rule["protocols"]]
-        srcaddr = ['"' + item + '"' for item in rule["srcaddr"]]
-        dstaddr = ['"' + item + '"' for item in rule["dstaddr"]]
-        try:
-            print(rc.format(name=rule['name'], action=rule["action"], priority=priority, protocols=','.join(protocols), srcips=','.join(srcaddr), dstips=','.join(dstaddr), dstports=','.join(rule["dstports"])))
-            # .format(name=rule["name"], srcip=' '.join(rule["srcaddr"]), dstip=' '.join(rule["dstaddr"]), dstports=' '.join(rule["dstports"]), prot=' '.join(rule["protocols"]), action=new_policy["action"], azfw_policy_name=azfw_policy_name, priority=str(priority), rg=rg, rcg_name=azfw_collection_group))
-        except Exception as e:
-            print ("Error", str(e),"when printing rule", str(rule))
-            pass
+        if (rule_index >= args.min_rule) and (args.max_rule == 0 or rule_index <= args.max_rule):
+            # If the only protocol is ICMP, open up all ports
+            if rule["protocols"] == ['icmp']:
+                rule["dstports"] = ['"*"']
+            # Replace single quotes with double quotes (in case there is another '*' in the port list)
+            rule['dstports'] = [str(item).replace("'", '"') for item in rule['dstports']]
+            # Add a random suffix to the policy name to make sure it is unique
+            random_suffix = ''.join(random.choices(string.ascii_letters + string.digits, k=4))
+            rule["name"] = rule["name"] + "-" + random_suffix
+            # If no action was detected, default to 'Allow'
+            if rule["action"] == "":
+                rule["action"] = "Allow"
+            # Replace "Any" by a list of protocols (not sure if this is needed)
+            if rule["protocols"] == ['Any']:
+                rule["protocols"] = ['tcp', 'udp', 'icmp']
+            # Replace "0.0.0.0/0" by "*" (not sure if this is needed)
+            if rule["srcaddr"] == ['0.0.0.0/0'] or len(rule["srcaddr"]) == 0:
+                rule["srcaddr"] = ['*']
+            if rule["dstaddr"] == ['0.0.0.0/0'] or len(rule["dstaddr"]) == 0:
+                rule["dstaddr"] = ['*']
+            # Add quotes to the string elements to make them JSON-conform
+            protocols = ['"' + item + '"' for item in rule["protocols"]]
+            srcaddr = ['"' + item + '"' for item in rule["srcaddr"]]
+            dstaddr = ['"' + item + '"' for item in rule["dstaddr"]]
+            # If the first rule in a collection, print the collection header
+            if (output_rule_index - 1) % args.rules_per_collection == 0:
+                # If this is not the first collection, close the previous one
+                if collection_index > 1:
+                    print (rc_footer, ',')
+                    priority += 10
+                # Open the new collection
+                random_collection_name = ''.join(random.choices(string.ascii_letters + string.digits, k=6))
+                print (rc_header.format(action=rule["action"], name=random_collection_name, priority=priority))
+                collection_index += 1
+            # If not the first rule in a collection, print a ',' to separate JSON objects
+            else:
+                print(',')
+            # Output text
+            try:
+                print(rule_json.format(name=rule['name'], protocols=','.join(protocols), srcips=','.join(srcaddr), dstips=','.join(dstaddr), dstports=','.join(rule["dstports"])))
+                # .format(name=rule["name"], srcip=' '.join(rule["srcaddr"]), dstip=' '.join(rule["dstaddr"]), dstports=' '.join(rule["dstports"]), prot=' '.join(rule["protocols"]), action=new_policy["action"], azfw_policy_name=azfw_policy_name, priority=str(priority), rg=rg, rcg_name=azfw_collection_group))
+            except Exception as e:
+                print ("Error", str(e),"when printing rule", str(rule))
+                pass
+            # Increment counters
+            output_rule_index += 1
+        rule_index += 1
 
     # Close the JSON code
+    print (rc_footer)
     print (rcg_footer)
     print (template_footer)
 else:
