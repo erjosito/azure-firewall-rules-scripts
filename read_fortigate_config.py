@@ -30,7 +30,12 @@ def netmask_to_cidr(m_netmask):
         return(sum([ bin(int(bits)).count("1") for bits in m_netmask.split(".") ]))
 
 def resolve_name(fqdn):
-    return str(random.randint(1,255)) + "." + str(random.randint(1,255)) + "." + str(random.randint(1,255)) + "." + str(random.randint(1,255)) + "/32"
+    if resolve_fqdns:
+        # Since we have no access to corporate DNS, I will generate random IP addresses here if FQDNs are to be resolved
+        return str(random.randint(1,255)) + "." + str(random.randint(1,255)) + "." + str(random.randint(1,255)) + "." + str(random.randint(1,255)) + "/32"
+    else:
+        # If FQDN resolution is disabled, just return the same FQDN without resolving it
+        return fqdn
 
 # Get input arguments
 parser = argparse.ArgumentParser(description='Get the latest flow logs in a storage account')
@@ -38,7 +43,7 @@ parser.add_argument('--file', dest='file_name', action='store',
                     help='you need to supply a file to analyze')
 parser.add_argument('--format', dest='format', action='store',
                     default="azcli",
-                    help='output format. Possible values: azcli (default), json')
+                    help='output format. Possible values: azcli (default), json, csv')
 parser.add_argument('--min-rule', dest='min_rule', action='store', type=int,
                     default=1,
                     help='minimum rule number to include in the output. The default is 1 (start with 1st rule)')
@@ -60,11 +65,15 @@ parser.add_argument('--rules-per-collection', dest='rules_per_collection', actio
 parser.add_argument('--verbose', dest='verbose', action='store_true',
                     default=False,
                     help='run in verbose mode (default: False)')
+parser.add_argument('--dont-resolve-fqdns', dest='resolve_fqdns', action='store_false',
+                    default=True,
+                    help='Do not resolve FQDNs specified in the default ruleset (default: False)')
 args = parser.parse_args()
 
 
 file_name = args.file_name
 verbose = args.verbose
+resolve_fqdns = args.resolve_fqdns
 
 # Initialize variables
 random.seed()
@@ -162,7 +171,6 @@ with open(file_name) as fp:
                             if verbose:
                                 print ("Adding IP range", ip_range, "to destination addresses")
                     # If the line is just a FQDN (alphanumeric or dots), see whether to put it in srcaddr or dstaddr, depending on whether srcaddr is already a key
-                    # Since we have no access to schindler's DNS, I will generate random IP addresses here
                     m = re.match('^([\w|\.]+)$', line)
                     if m:
                         # If srcaddr is already a key, it means we are now looking at it
@@ -249,6 +257,20 @@ if args.format == "azcli":
         print("az network firewall policy rule-collection-group collection add-filter-collection --rule-type NetworkRule -o none", \
             "-g {rg} --rcg-name {rcg_name} --policy-name {azfw_policy_name} --action {action} --collection-priority {priority} --name {name} --rule-name {name} --source-addresses {srcip} --destination-addresses {dstip} --ip-protocols {prot} --destination-ports {dstports}" \
                 .format(name=rule["name"], srcip=' '.join(rule["srcaddr"]), dstip=' '.join(rule["dstaddr"]), dstports=' '.join(rule["dstports"]), prot=' '.join(rule["protocols"]), action=new_policy["action"], azfw_policy_name=azfw_policy_name, priority=str(priority), rg=rg, rcg_name=azfw_collection_group))
+
+elif args.format == "csv":
+    # Print headers
+    print ("Action, Rule name, Source IPs, Destination IPs, Protocols, Destination ports")
+    # Process generated rules
+    for rule in rules:
+        # If the only protocol is ICMP, open up all ports
+        if rule["protocols"] == ['icmp']:
+            rule["dstports"] = ["'*'"]
+        # Send the CSV lines to stdout, one line per src/dst combination
+        for srcaddr in rule["srcaddr"]:
+            for dstaddr in rule["dstaddr"]:
+                #print("{action}, {name}, {srcip}, {dstip}, {prot}, {dstports}".format(name=rule["name"], srcip=' '.join(rule["srcaddr"]), dstip=' '.join(rule["dstaddr"]), dstports=' '.join(rule["dstports"]), prot=' '.join(rule["protocols"]), action=new_policy["action"]))
+                print("{action}, {name}, {srcip}, {dstip}, {prot}, {dstports}".format(name=rule["name"], srcip=srcaddr, dstip=dstaddr, dstports=' '.join(rule["dstports"]), prot=' '.join(rule["protocols"]), action=new_policy["action"]))
 
 elif args.format == "json":
     rg = 'fortinet'
