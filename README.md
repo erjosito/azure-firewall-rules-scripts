@@ -1,8 +1,11 @@
-# Some tools to work with Azure Firewall Policies
+# Some tools to work with Azure Firewall Rules
 
-The purpose of this repo is providing some examples that illustrate different techniques to work with Azure Firewall Policies.
+The purpose of this repo is providing some examples that illustrate different techniques to work with Azure Firewall Rules. At this time two use cases are included:
 
-## Importing Azure Firewall Policy from a Fortigate configuration
+- Processing a text file with rules with a different syntax and output Azure Firewall syntax (ARM JSON or CLI)
+- Analyzing an existing Azure Policy and look for potential optimization through the usage of IP Groups to reduce the consumption of IP objects
+
+## Importing Azure Firewall rules from a Fortigate configuration
 
 As source configuration the example in this repo uses a configuration extracted from a Fortigate firewall. The goal of [read_fortigate_config.py](./read_fortigate_config.py) is not focusing on converting Fortigate configuration to Azure (other repos out there already extract Fortigate config to JSON, which would be easy to parse), but to offering a generic schema for processing generic, text-based configurations.
 
