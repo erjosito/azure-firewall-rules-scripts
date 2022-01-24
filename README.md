@@ -5,6 +5,10 @@ The purpose of this repo is providing some examples that illustrate different te
 - Processing a text file with rules with a different syntax and output Azure Firewall syntax (ARM JSON or CLI)
 - Analyzing an existing Azure Policy and look for potential optimization through the usage of IP Groups to reduce the consumption of IP objects
 
+## Disclaimer
+
+These scripts are shared as they are, and they are not supported by Microsoft in any way, shape or form. Be sure to test and validate the output of these scripts. If you find any issue with them, I would be thankful if you opened an issue in this repo.
+
 ## Importing Azure Firewall rules from a Fortigate configuration
 
 As source configuration the example in this repo uses a configuration extracted from a Fortigate firewall. The goal of [read_fortigate_config.py](./read_fortigate_config.py) is not focusing on converting Fortigate configuration to Azure (other repos out there already extract Fortigate config to JSON, which would be easy to parse), but to offering a generic schema for processing generic, text-based configurations.
