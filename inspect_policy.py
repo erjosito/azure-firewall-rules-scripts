@@ -8,7 +8,6 @@ import sys
 
 # Constants
 max_objects_per_group = 5000
-max_ipgroups = 100
 
 # Function to count objects for an array of IPs/subnets
 def count_objects(prefix_list, count_subnets_as_one=True):
@@ -138,7 +137,7 @@ def ipobject_savings(policy, ipgroups):
                 if dst_objects == 0:
                     print("ERROR: destination objects cannot be 0. Destination IP objects is {0}, destination group objects is {1}".format(str(dstip_objects), str(dstgroup_objects)))
                     sys.exit(1)
-    print("Overall potential savings of IP objects with {0} IP groups: {1} - from {2} to {3} ({4:.2%})".format(
+    if summary_output: print("Overall potential savings of IP objects with {0} IP groups: {1} - from {2} to {3} ({4:.2%})".format(
         str(len(ipgroups)),
         str(ipobjects_savings),
         str(total_objects),
@@ -147,11 +146,78 @@ def ipobject_savings(policy, ipgroups):
     ))
     return ipobject_savings
 
+# Outputs JSON code to create the recommended IP Groups
+# Sample ARM template for an IP Group
+# {
+#     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+#     "contentVersion": "1.0.0.0",
+#     "parameters": {
+#         "ipGroups_ipgroupblahblah_name": {
+#             "defaultValue": "ipgroupblahblah",
+#             "type": "String"
+#         }
+#     },
+#     "variables": {},
+#     "resources": [
+        # {
+        #     "type": "Microsoft.Network/ipGroups",
+        #     "apiVersion": "2020-11-01",
+        #     "name": "[parameters('ipGroups_ipgroupblahblah_name')]",
+        #     "location": "westeurope",
+        #     "properties": {
+        #         "ipAddresses": [
+        #             "10.0.0.1/32",
+        #             "192.168.100.0/24"
+        #         ]
+        #     }
+        # }
+#     ]
+# }
+def print_ipgroup_arm(ipgroups):
+    api_version = '2020-11-01'
+    template_header = '''{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {},
+    "variables": {},
+    "resources": ['''
+    template_footer = '    ]\n}'
+    print(template_header, end="")
+    ipgroup_count = 0
+    for ipgroup_name in ipgroups:
+        if ipgroup_count == 0:
+            print ('')
+        else:
+            print (',')
+        resource_header = """        {{
+            \"type\": \"Microsoft.Network/ipGroups\",
+            \"apiVersion\": "{0}",
+            \"name\": \"{1}\",
+            \"location\": \"[resourceGroup().location]\",
+            \"properties\": {{
+                \"ipAddresses\": [""".format(api_version, ipgroup_name)
+        resource_footer = '                ]\n            }\n        }'
+        print(resource_header, end="")
+        prefix_count = 0
+        for prefix in ipgroups[ipgroup_name]['prefixes']:
+            if prefix_count == 0:
+                print('')
+            else:
+                print(',')
+            print("                    \"{0}\"".format(str(prefix)), end="")
+            prefix_count += 1
+        print('')
+        print(resource_footer, end="")
+        ipgroup_count += 1
+    print('')
+    print(template_footer)
 
 # Arguments
 parser = argparse.ArgumentParser(description='Analyze Azure Firewall Policy')
 parser.add_argument('--file', dest='file_name', action='store',
                     help='you need to supply a file to analyze')
+parser.add_argument('--max-ip-groups', dest='max_ipgroups', action='store', type=int, default=100,
+                    help='Maximum number of IP groups in an Azure Policy')
 parser.add_argument('--rule-name', dest='rule_name', action='store',
                     help='you can supply a rule name to see the details of that rule')
 parser.add_argument('--ip-group-detail', dest='ipgroup_detail', action='store_true',
@@ -160,6 +226,12 @@ parser.add_argument('--ip-group-detail', dest='ipgroup_detail', action='store_tr
 parser.add_argument('--rule-detail', dest='rule_detail', action='store_true',
                     default=False,
                     help='Display detailed info about rules (default: False)')
+parser.add_argument('--no-summary', dest='summary_output', action='store_false',
+                    default=True,
+                    help='Display summary info (default: False)')
+parser.add_argument('--ip-group-arm', dest='ipgroup_arm', action='store_true',
+                    default=False,
+                    help='Output ARM code to create the recommended IP Groups (default: False)')
 parser.add_argument('--allow-larger-groups', dest='larger_groups', action='store_true',
                     default=False,
                     help='Display detailed info about rules (default: False)')
@@ -170,9 +242,12 @@ args = parser.parse_args()
 file_name = args.file_name
 rule_name = args.rule_name
 ipgroup_detail = args.ipgroup_detail
+ipgroup_arm = args.ipgroup_arm
 rule_detail = args.rule_detail
 allow_larger_groups = args.larger_groups
 verbose = args.verbose
+max_ipgroups = args.max_ipgroups
+summary_output = args.summary_output
 
 # Opening JSON file
 f = open(file_name)
@@ -198,14 +273,14 @@ if rule_name:
     sys.exit()
 
 # Print some info
-print("Number of Network Rule Collections: {0}".format(str(len(policy['NetworkRuleCollections']))))
+if summary_output: print("Number of Network Rule Collections: {0}".format(str(len(policy['NetworkRuleCollections']))))
 rules_no=0
 max_rules_per_coll=0
 for collection in policy['NetworkRuleCollections']:
     rules_no += len(collection['Rules'])
-    if len(collection['Rules']) > max_rules_per_coll: max_rules_per_coll = len(collection['Rules']) 
-print("Number of Rules: {0}".format(str(rules_no)))
-print("Maximum number of Rules in a Collection: {0}".format(str(max_rules_per_coll)))
+    if len(collection['Rules']) > max_rules_per_coll: max_rules_per_coll = len(collection['Rules'])
+if summary_output: print("Number of Rules: {0}".format(str(rules_no)))
+if summary_output: print("Maximum number of Rules in a Collection: {0}".format(str(max_rules_per_coll)))
 
 # Analyze rule per rule
 total_objects = 0
@@ -333,10 +408,10 @@ for collection in policy['NetworkRuleCollections']:
         if rule_objects > max_objects_per_rule: max_objects_per_rule = rule_objects
         if rule['SourceIpGroups'] and len(rule['SourceIpGroups']) > 0: rule_src_ipgroup_counter += 1
         if rule['DestinationIpGroups'] and len(rule['DestinationIpGroups']) > 0: rule_dst_ipgroup_counter += 1
-print ("Total number of IP objects for the policy ({1} rules processed): {0}".format(str(total_objects), str(rule_counter)))
-print ("Maximum number of IP objects per rule: {0}".format(str(max_objects_per_rule)))
-print ("{0} rules using source IP groups, {1} rules using destination IP groups".format(str(rule_src_ipgroup_counter), str(rule_dst_ipgroup_counter)))
-print ("{0} rules found with more than {1} IP objects".format(str(rule_too_many_objects), str(max_objects_per_group)))
+if summary_output: print ("Total number of IP objects for the policy ({1} rules processed): {0}".format(str(total_objects), str(rule_counter)))
+if summary_output: print ("Maximum number of IP objects per rule: {0}".format(str(max_objects_per_rule)))
+if summary_output: print ("{0} rules using source IP groups, {1} rules using destination IP groups".format(str(rule_src_ipgroup_counter), str(rule_dst_ipgroup_counter)))
+if summary_output: print ("{0} rules found with more than {1} IP objects".format(str(rule_too_many_objects), str(max_objects_per_group)))
 
 # Look at the ipgroups dictionary
 existing_ipgroup_count = 0
@@ -356,10 +431,10 @@ for ipgroup_name in ipgroups:
     else:
         new_ipgroup_count += 1
         if ipgroup_rule_no > new_ipgroup_used_max: new_ipgroup_used_max = ipgroup_rule_no
-print("{0} unique IP groups originally defined in the ruleset, maximum utilization of existing groups is {1}".format(str(existing_ipgroup_count), str(existing_ipgroup_used_max)))
-print("{0} unique new IP groups could be added, maximum object count in these new groups is {1}".format(str(new_ipgroup_count), str(new_ipgroup_used_max)))
+if summary_output: print("{0} unique IP groups originally defined in the ruleset, maximum utilization of existing groups is {1}".format(str(existing_ipgroup_count), str(existing_ipgroup_used_max)))
+if summary_output: print("{0} unique new IP groups could be added, maximum object count in these new groups is {1}".format(str(new_ipgroup_count), str(new_ipgroup_used_max)))
 max_new_ipgroups = max_ipgroups - existing_ipgroup_count
-print("Given the limit of {0} IP groups per policy, {1} new IP groups can still be defined".format(str(max_ipgroups), str(max_new_ipgroups)))
+if summary_output: print("Given the limit of {0} IP groups per policy, {1} new IP groups can still be defined".format(str(max_ipgroups), str(max_new_ipgroups)))
 
 # Count the required IP groups
 for ipgroup_name in ipgroups:
@@ -390,3 +465,6 @@ if ipgroup_detail:
         print("New IP group {1} for prefixes {0}".format(str(ipgroups[ipgroup_name]['prefixes']), ipgroup_name))
         if 'srcrules' in ipgroups[ipgroup_name]: print("  Used by rules as source: {0}".format(str(ipgroups[ipgroup_name]['srcrules'])))
         if 'dstrules' in ipgroups[ipgroup_name]: print("  Used by rules as destination: {0}".format(str(ipgroups[ipgroup_name]['dstrules'])))
+
+if ipgroup_arm:
+    print_ipgroup_arm(new_ipgroups)
