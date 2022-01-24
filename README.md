@@ -196,3 +196,9 @@ Overall potential savings of IP objects with 91 IP groups: 35801 - from 38986 to
 ```
 
 If you want to see what IP Groups exactly should be created and which rules would be optimized, you can add the parameters `--ip-group-detail` or `--rule=detail` to get extra verbose information.
+
+You can additional tune the maximum number of IP groups that you want to use (100 is the Azure maximum, but you might want to leave some space for future growth), and generate ARM JSON code to create the recommended IP Groups:
+
+```
+python ./inspect_policy.py --file ./2022-01-12T12_35_11.json --no-summary --ip-group-arm --max-ip-groups 80 >new_ipgroup_template.json
+```
