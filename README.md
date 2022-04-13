@@ -13,9 +13,12 @@ These scripts are shared as they are, and they are not supported by Microsoft in
 
 The script `o365_rules.py` downloads the JSON in `https://endpoints.office.com/endpoints/worldwide?clientrequestid=b10c5ed1-bad1-445f-b386-b919946339a7` and generates an ARM template for an Azure Firewall Policy that can be imported to Azure: 
 
-```
+```bash
+# Run in test mode
 python3 ./o365_rules.py --format none --verbose
+# Generate ARM template
 python3 ./o365_rules.py >o365sample.json
+# Deploy ARM Template
 rg=myrg
 location=westeurope
 az group create -n $rg -l $location
