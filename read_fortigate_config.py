@@ -17,7 +17,6 @@ import argparse
 import socket
 from types import prepare_class
 
-
 def netmask_to_cidr(m_netmask):
     try:
         ip = socket.gethostbyname(d)

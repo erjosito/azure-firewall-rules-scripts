@@ -9,6 +9,20 @@ The purpose of this repo is providing some examples that illustrate different te
 
 These scripts are shared as they are, and they are not supported by Microsoft in any way, shape or form. Be sure to test and validate the output of these scripts. If you find any issue with them, I would be thankful if you opened an issue in this repo.
 
+## Creating a policy with O365 endpoints
+
+The script `o365_rules.py` downloads the JSON in `https://endpoints.office.com/endpoints/worldwide?clientrequestid=b10c5ed1-bad1-445f-b386-b919946339a7` and generates an ARM template for an Azure Firewall Policy that can be imported to Azure: 
+
+```
+python3 ./o365_rules.py --format none --verbose
+python3 ./o365_rules.py >o365sample.json
+rg=myrg
+location=westeurope
+az group create -n $rg -l $location
+az deployment group create -n o365$RANDOM -g $rg -o none --template-file ./o365sample.json
+```
+
+
 ## Importing Azure Firewall rules from a Fortigate configuration
 
 As source configuration the example in this repo uses a configuration extracted from a Fortigate firewall. The goal of [read_fortigate_config.py](./read_fortigate_config.py) is not focusing on converting Fortigate configuration to Azure (other repos out there already extract Fortigate config to JSON, which would be easy to parse), but to offering a generic schema for processing generic, text-based configurations.
