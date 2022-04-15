@@ -25,13 +25,13 @@
         {
             "type": "Microsoft.Network/firewallPolicies/ruleCollectionGroups",
             "apiVersion": "2021-02-01",
-            "name": "o365policy/o365net",
+            "name": "o365policy/o365",
             "location": "[variables('location')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/firewallPolicies', 'o365policy')]"
             ],
             "properties": {
-                "priority": 10900,
+                "priority": 10000,
                 "ruleCollections": [
                   {
                         "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
@@ -43,7 +43,7 @@
                         "rules": [
                             {
                                 "ruleType": "NetworkRule",
-                                "name": "id2",
+                                "name": "id2ExchangeOnline",
                                 "ipProtocols": [
                                     "tcp"
                                 ],
@@ -65,7 +65,7 @@
                             ,
                             {
                                 "ruleType": "NetworkRule",
-                                "name": "id5",
+                                "name": "id5ExchangeOnline",
                                 "ipProtocols": [
                                     "tcp"
                                 ],
@@ -87,7 +87,7 @@
                             ,
                             {
                                 "ruleType": "NetworkRule",
-                                "name": "id6",
+                                "name": "id6ExchangeOnline",
                                 "ipProtocols": [
                                     "tcp"
                                 ],
@@ -109,7 +109,7 @@
                             ,
                             {
                                 "ruleType": "NetworkRule",
-                                "name": "id10",
+                                "name": "id10ExchangeOnline",
                                 "ipProtocols": [
                                     "tcp"
                                 ],
@@ -131,7 +131,7 @@
                             ,
                             {
                                 "ruleType": "NetworkRule",
-                                "name": "id11",
+                                "name": "id11SkypeforBusinessOnlineandMicrosoftTeams",
                                 "ipProtocols": [
                                     "udp"
                                 ],
@@ -150,28 +150,6 @@
                                     3478,3479,3480,3481
                                 ]
                             }
-                            ,
-                            {
-                                "ruleType": "NetworkRule",
-                                "name": "id157",
-                                "ipProtocols": [
-                                    "tcp"
-                                ],
-                                "sourceAddresses": [
-                                    "*"
-                                ],
-                                "sourceIpGroups": [],
-                                "destinationAddresses": [
-                                    
-                                ],
-                                "destinationIpGroups": [],
-                                "destinationFqdns": [
-                                    "ocsp.int-x3.letsencrypt.org"
-                                ],
-                                "destinationPorts": [
-                                    80
-                                ]
-                            }
                         ]} ,
                   {
                         "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
@@ -183,7 +161,7 @@
                         "rules": [
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id1",
+                                "name": "id1ExchangeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
@@ -202,7 +180,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id3",
+                                "name": "id3ExchangeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
@@ -221,7 +199,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id8",
+                                "name": "id8ExchangeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
@@ -240,7 +218,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id9",
+                                "name": "id9ExchangeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -259,7 +237,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id12",
+                                "name": "id12SkypeforBusinessOnlineandMicrosoftTeams",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
@@ -278,7 +256,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id13",
+                                "name": "id13SkypeforBusinessOnlineandMicrosoftTeams",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -297,7 +275,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id15",
+                                "name": "id15SkypeforBusinessOnlineandMicrosoftTeams",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
@@ -316,7 +294,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id16",
+                                "name": "id16SkypeforBusinessOnlineandMicrosoftTeams",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -335,7 +313,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id17",
+                                "name": "id17SkypeforBusinessOnlineandMicrosoftTeams",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -354,7 +332,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id18",
+                                "name": "id18SkypeforBusinessOnlineandMicrosoftTeams",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -373,7 +351,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id19",
+                                "name": "id19SkypeforBusinessOnlineandMicrosoftTeams",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
@@ -392,7 +370,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id22",
+                                "name": "id22SkypeforBusinessOnlineandMicrosoftTeams",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -411,7 +389,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id26",
+                                "name": "id26SkypeforBusinessOnlineandMicrosoftTeams",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -430,7 +408,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id27",
+                                "name": "id27SkypeforBusinessOnlineandMicrosoftTeams",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -449,7 +427,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id31",
+                                "name": "id31SharePointOnlineandOneDriveforBusiness",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
@@ -468,7 +446,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id32",
+                                "name": "id32SharePointOnlineandOneDriveforBusiness",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -487,7 +465,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id33",
+                                "name": "id33SharePointOnlineandOneDriveforBusiness",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -506,7 +484,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id35",
+                                "name": "id35SharePointOnlineandOneDriveforBusiness",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
@@ -525,7 +503,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id36",
+                                "name": "id36SharePointOnlineandOneDriveforBusiness",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
@@ -544,7 +522,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id37",
+                                "name": "id37SharePointOnlineandOneDriveforBusiness",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
@@ -563,7 +541,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id39",
+                                "name": "id39SharePointOnlineandOneDriveforBusiness",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
@@ -582,7 +560,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id41",
+                                "name": "id41Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -601,7 +579,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id43",
+                                "name": "id43Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -620,7 +598,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id44",
+                                "name": "id44Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -639,7 +617,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id45",
+                                "name": "id45Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -658,7 +636,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id46",
+                                "name": "id46Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
@@ -677,7 +655,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id47",
+                                "name": "id47Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -696,7 +674,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id49",
+                                "name": "id49Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -715,7 +693,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id50",
+                                "name": "id50Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -734,7 +712,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id51",
+                                "name": "id51Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -753,7 +731,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id53",
+                                "name": "id53Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -772,7 +750,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id56",
+                                "name": "id56Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
@@ -791,7 +769,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id59",
+                                "name": "id59Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
@@ -810,7 +788,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id64",
+                                "name": "id64Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -829,7 +807,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id65",
+                                "name": "id65Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
@@ -848,7 +826,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id66",
+                                "name": "id66Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -867,7 +845,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id67",
+                                "name": "id67Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -886,7 +864,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id68",
+                                "name": "id68Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -905,7 +883,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id69",
+                                "name": "id69Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -924,7 +902,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id70",
+                                "name": "id70Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -943,7 +921,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id71",
+                                "name": "id71Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -962,7 +940,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id72",
+                                "name": "id72Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -981,7 +959,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id73",
+                                "name": "id73Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -1000,7 +978,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id75",
+                                "name": "id75Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -1019,7 +997,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id78",
+                                "name": "id78Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
@@ -1038,7 +1016,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id79",
+                                "name": "id79Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
@@ -1057,7 +1035,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id83",
+                                "name": "id83Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -1076,7 +1054,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id84",
+                                "name": "id84Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
@@ -1095,7 +1073,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id86",
+                                "name": "id86Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -1114,7 +1092,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id88",
+                                "name": "id88Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
@@ -1133,7 +1111,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id89",
+                                "name": "id89Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
@@ -1152,7 +1130,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id91",
+                                "name": "id91Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
@@ -1171,7 +1149,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id92",
+                                "name": "id92Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
@@ -1190,7 +1168,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id93",
+                                "name": "id93Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
@@ -1209,7 +1187,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id95",
+                                "name": "id95Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -1228,7 +1206,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id96",
+                                "name": "id96Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -1247,7 +1225,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id97",
+                                "name": "id97Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -1266,7 +1244,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id105",
+                                "name": "id105Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -1285,7 +1263,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id114",
+                                "name": "id114Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
@@ -1304,7 +1282,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id116",
+                                "name": "id116Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
@@ -1323,7 +1301,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id117",
+                                "name": "id117Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -1342,7 +1320,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id118",
+                                "name": "id118Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -1361,7 +1339,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id121",
+                                "name": "id121Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
@@ -1380,7 +1358,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id122",
+                                "name": "id122Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -1399,7 +1377,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id124",
+                                "name": "id124Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -1418,7 +1396,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id125",
+                                "name": "id125Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
@@ -1437,7 +1415,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id126",
+                                "name": "id126Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -1456,7 +1434,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id127",
+                                "name": "id127SkypeforBusinessOnlineandMicrosoftTeams",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
@@ -1475,7 +1453,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id128",
+                                "name": "id128Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -1494,7 +1472,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id147",
+                                "name": "id147Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
@@ -1513,7 +1491,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id148",
+                                "name": "id148Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
@@ -1532,7 +1510,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id149",
+                                "name": "id149Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
@@ -1551,7 +1529,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id152",
+                                "name": "id152Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -1570,7 +1548,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id153",
+                                "name": "id153Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -1589,7 +1567,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id154",
+                                "name": "id154ExchangeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
@@ -1608,7 +1586,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id156",
+                                "name": "id156Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -1627,7 +1605,26 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id158",
+                                "name": "id157Microsoft365CommonandOfficeOnline",
+                                "terminateTLS": false,
+                                "protocols": [
+                                    { "protocolType": "Http", "port": 80 }
+                                ],
+                                "sourceAddresses": [
+                                    "*"
+                                ],
+                                "fqdnTags": [],
+                                "webCategories": [],
+                                "targetUrls": [],
+                                "destinationAddresses": [],
+                                "targetFqdns": [
+                                    "ocsp.int-x3.letsencrypt.org"
+                                ]
+                            }
+                            ,
+                            {
+                                "ruleType": "ApplicationRule",
+                                "name": "id158Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Https", "port": 443 }
@@ -1646,7 +1643,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id159",
+                                "name": "id159Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
@@ -1665,7 +1662,7 @@
                             ,
                             {
                                 "ruleType": "ApplicationRule",
-                                "name": "id160",
+                                "name": "id160Microsoft365CommonandOfficeOnline",
                                 "terminateTLS": false,
                                 "protocols": [
                                     { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }

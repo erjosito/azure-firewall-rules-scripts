@@ -41,6 +41,7 @@ args = parser.parse_args()
 o365_endpoints_url = 'https://endpoints.office.com/endpoints/worldwide?clientrequestid=b10c5ed1-bad1-445f-b386-b919946339a7'
 app_rules = []
 net_rules = []
+rcg_name = 'o365'
 rcg_prio = "10000"
 rc_app_name = 'o365app'
 rc_app_prio = "11000"
@@ -67,11 +68,11 @@ cnt_endpoints = 0
 for endpoint in o365_data:
     cnt_endpoints += 1
     # App Rule
-    if ('tcpPorts' in endpoint) and ((endpoint['tcpPorts'] == "80,443") or (endpoint['tcpPorts'] == "443")):
+    if ('tcpPorts' in endpoint) and ((endpoint['tcpPorts'] == "80,443") or (endpoint['tcpPorts'] == "443") or (endpoint['tcpPorts'] == "80")):
         cnt_apprules += 1
         if 'urls' in endpoint:
             new_rule = {
-                'name': 'id' + str(endpoint['id']),
+                'name': 'id' + str(endpoint['id']) + str(endpoint['serviceAreaDisplayName']).replace(" ", ""),
                 'action': 'allow',
                 'dst_fqdn': verify_urls(endpoint['urls']),
                 'dst_ports': str(endpoint['tcpPorts']).split(",")
@@ -84,7 +85,7 @@ for endpoint in o365_data:
         cnt_netrules_ip += 1
         if ('ips' in endpoint) and (('tcpPorts' in endpoint) or ('udpPorts' in endpoint)):
             new_rule = {
-                'name': 'id' + str(endpoint['id']),
+                'name': 'id' + str(endpoint['id']) + str(endpoint['serviceAreaDisplayName']).replace(" ", ""),
                 'action': 'allow',
                 'dst_ip': endpoint['ips'],
                 'dst_fqdn': ''
@@ -111,7 +112,7 @@ for endpoint in o365_data:
         cnt_netrules_fqdn += 1
         if ('urls' in endpoint) and (('tcpPorts' in endpoint) or ('udpPorts' in endpoint)):
             new_rule = {
-                'name': 'id' + str(endpoint['id']),
+                'name': 'id' + str(endpoint['id']) + str(endpoint['serviceAreaDisplayName']).replace(" ", ""),
                 'action': 'allow',
                 'dst_ip': '',
                 'dst_fqdn': endpoint['urls'],
@@ -226,6 +227,7 @@ if args.format == "json":
                                 ]
                             }}"""
     protocol_https_only = """{ "protocolType": "Https", "port": 443 }"""
+    protocol_http_only = """{ "protocolType": "Http", "port": 80 }"""
     protocol_https_and_http = """{ "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }"""
     rc_footer = "                        ]}"
     rcg_footer = "      ] } }"
@@ -234,7 +236,7 @@ if args.format == "json":
     print (policy_resource.format(azfw_policy_name=azfw_policy_name, api_version=api_version))
 
     # RCG
-    print (rcg_header.format(azfw_policy_name=azfw_policy_name, rcg_name=rc_net_name, rcg_prio=rc_net_prio, api_version=api_version))
+    print (rcg_header.format(azfw_policy_name=azfw_policy_name, rcg_name=rcg_name, rcg_prio=rcg_prio, api_version=api_version))
 
     # Net rules
     output_net_rule_index = 1
@@ -268,9 +270,15 @@ if args.format == "json":
         # Add quotes to the string elements to make them JSON-conform
         srcaddr = [ '"*"' ]
         dstfqdn = ['"' + item + '"' for item in rule["dst_fqdn"]]
-        if '80' in rule['dst_ports']:
+        if ('80' in rule['dst_ports']) and ('443' in rule['dst_ports']):
             protocols = protocol_https_and_http
+        elif ('80' in rule['dst_ports']):
+            protocols = protocol_http_only
+        elif ('443' in rule['dst_ports']):
+            protocols = protocol_https_only
         else:
+            if args.verbose:
+                print("WARNING: unknown ports for App Rule:", str(rule['dst_ports']))
             protocols = protocol_https_only
         # If the first rule in a collection, print the collection header
         if output_app_rule_index == 1:
