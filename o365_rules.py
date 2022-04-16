@@ -52,6 +52,12 @@ parser = argparse.ArgumentParser(description='Update a checklist spreadsheet wit
 parser.add_argument('--policy-name', dest='policy_name', action='store',
                     default="o365policy",
                     help='Name for the Azure Firewall Policy. The default is "o365policy"')
+parser.add_argument('--rcg-name', dest='rcg_name', action='store',
+                    default="o365",
+                    help='Name for the Rule Collection Group to create in the Azure Firewall Policy. The default is "o365"')
+parser.add_argument('--rcg-priority', dest='rcg_prio', action='store',
+                    default="10000",
+                    help='Priority for the Rule Collection Group to create in the Azure Firewall Policy. The default is "10000"')
 parser.add_argument('--format', dest='format', action='store',
                     default="json",
                     help='Output format. Possible values: json, none')
@@ -67,14 +73,14 @@ args = parser.parse_args()
 o365_endpoints_url = 'https://endpoints.office.com/endpoints/worldwide?clientrequestid=b10c5ed1-bad1-445f-b386-b919946339a7'
 app_rules = []
 net_rules = []
-rcg_name = 'o365'
-rcg_prio = "10000"
+rcg_name = args.rcg_name
+rcg_prio = args.rcg_prio
 rc_app_name = 'o365app'
 rc_app_prio = "11000"
 rc_net_name = 'o365net'
 rc_net_prio = "10900"
 
-# Get O365 endpoints
+# Get O365 endpoints from the Internet
 response = requests.get(o365_endpoints_url)
 if response.status_code == 200:
     if args.verbose:
@@ -99,10 +105,16 @@ for endpoint in o365_data:
         if 'urls' in endpoint:
             new_rule = {
                 'name': 'id' + str(endpoint['id']) + '-' + str(endpoint['serviceAreaDisplayName']).replace(" ", ""),
-                'action': 'allow',
-                'dst_fqdn': verify_urls(endpoint['urls']),
-                'dst_ports': str(endpoint['tcpPorts']).split(",")
+                'ruleType': 'ApplicationRule',
+                'sourceAddresses': [ '*' ],
+                'targetFqdns': verify_urls(endpoint['urls']),
+                'protocols': []
             }
+            dst_ports = str(endpoint['tcpPorts']).split(",")
+            if '80' in dst_ports:
+                new_rule['protocols'].append({'protocolType': 'Http', 'port': 80})
+            if '443' in dst_ports:
+                new_rule['protocols'].append({'protocolType': 'Https', 'port': 443})
             app_rules.append(new_rule)
         else:
             print('ERROR Endpoint ID {0} is web-based but does not have URLs'.format(endpoint['id']))
@@ -112,16 +124,17 @@ for endpoint in o365_data:
         if ('ips' in endpoint) and (('tcpPorts' in endpoint) or ('udpPorts' in endpoint)):
             new_rule = {
                 'name': 'id' + str(endpoint['id']) + '-' + str(endpoint['serviceAreaDisplayName']).replace(" ", ""),
-                'action': 'allow',
-                'dst_ip': filter_ips(endpoint['ips']),
-                'dst_fqdn': ''
+                'ruleType': 'NetworkRule',
+                'sourceAddresses': [ '*' ],
+                'destinationAddresses': filter_ips(endpoint['ips']),
+                'destinationFqdns': []
             }
             if 'tcpPorts' in endpoint:
-                new_rule['protocols'] = [ 'tcp' ]
-                new_rule['dst_ports'] = str(endpoint['tcpPorts']).split(",")
+                new_rule['ipProtocols'] = [ 'tcp' ]
+                new_rule['destinationPorts'] = str(endpoint['tcpPorts']).split(",")
             else:
-                new_rule['protocols'] = [ 'udp' ]
-                new_rule['dst_ports'] = str(endpoint['udpPorts']).split(",")
+                new_rule['ipProtocols'] = [ 'udp' ]
+                new_rule['destinationPorts'] = str(endpoint['udpPorts']).split(",")
             net_rules.append(new_rule)
             # Watch out for UDP+TCP!
             if ('udpPorts' in endpoint) and ('tcpPorts' in endpoint):
@@ -139,16 +152,17 @@ for endpoint in o365_data:
         if ('urls' in endpoint) and (('tcpPorts' in endpoint) or ('udpPorts' in endpoint)):
             new_rule = {
                 'name': 'id' + str(endpoint['id']) + '-' + str(endpoint['serviceAreaDisplayName']).replace(" ", ""),
-                'action': 'allow',
-                'dst_ip': '',
-                'dst_fqdn': endpoint['urls'],
+                'ruleType': 'NetworkRule',
+                'sourceAddresses': [ '*' ],
+                'destinationAddresses': [],
+                'destinationFqdns': endpoint['urls'],
             }
             if 'tcpPorts' in endpoint:
-                new_rule['protocols'] = [ 'tcp' ]
-                new_rule['dst_ports'] = str(endpoint['tcpPorts']).split(",")
+                new_rule['ipProtocols'] = [ 'tcp' ]
+                new_rule['destinationPorts'] = str(endpoint['tcpPorts']).split(",")
             else:
-                new_rule['protocols'] = [ 'udp' ]
-                new_rule['dst_ports'] = str(endpoint['udpPorts']).split(",")
+                new_rule['ipProtocols'] = [ 'udp' ]
+                new_rule['destinationPorts'] = str(endpoint['udpPorts']).split(",")
             net_rules.append(new_rule)
             # Watch out for UDP+TCP!
             if ('udpPorts' in endpoint) and ('tcpPorts' in endpoint):
@@ -165,7 +179,7 @@ for endpoint in o365_data:
 # Output #
 ##########
 
-if args.format == "json":
+if args.format == "jsonold":
     # api_version = "2020-11-01"
     api_version = "2021-02-01"
     azfw_policy_name = args.policy_name
@@ -268,21 +282,20 @@ if args.format == "json":
     output_net_rule_index = 1
     for rule in net_rules:
         # Add quotes to the string elements to make them JSON-conform
-        protocols = ['"' + item + '"' for item in rule["protocols"]]
+        protocols = ['"' + item + '"' for item in rule['ipProtocols']]
         srcaddr = [ '"*"' ]
-        dstaddr = ['"' + item + '"' for item in rule["dst_ip"]]
-        dstfqdn = ['"' + item + '"' for item in rule["dst_fqdn"]]
+        dstaddr = ['"' + item + '"' for item in rule['destinationAddresses']]
+        dstfqdn = ['"' + item + '"' for item in rule['destinationFqdns']]
         # If the first rule in a collection, print the collection header
         if output_net_rule_index == 1:
             # Open the new collection
-            print (rc_header.format(action=rule["action"], name=rc_net_name, priority=rc_net_prio))
+            print (rc_header.format(action='allow', name=rc_net_name, priority=rc_net_prio))
         # If not the first rule in a collection, print a ',' to separate JSON objects
         else:
             print('                            ,')
         # Output text
         try:
-            print(net_rule_json.format(name=rule['name'], protocols=','.join(protocols), srcips=','.join(srcaddr), dstips=','.join(dstaddr), dstfqdns=','.join(dstfqdn), dstports=','.join(rule["dst_ports"])))
-            # .format(name=rule["name"], srcip=' '.join(rule["srcaddr"]), dstip=' '.join(rule["dstaddr"]), dstports=' '.join(rule["dstports"]), prot=' '.join(rule["protocols"]), action=new_policy["action"], azfw_policy_name=azfw_policy_name, priority=str(priority), rg=rg, rcg_name=azfw_collection_group))
+            print(net_rule_json.format(name=rule['name'], protocols=','.join(protocols), srcips=','.join(srcaddr), dstips=','.join(dstaddr), dstfqdns=','.join(dstfqdn), dstports=','.join(rule["destinationPorts"])))
         except Exception as e:
             print ("Error", str(e),"when printing rule", str(rule))
             pass
@@ -295,28 +308,28 @@ if args.format == "json":
     for rule in app_rules:
         # Add quotes to the string elements to make them JSON-conform
         srcaddr = [ '"*"' ]
-        dstfqdn = ['"' + item + '"' for item in rule["dst_fqdn"]]
-        if ('80' in rule['dst_ports']) and ('443' in rule['dst_ports']):
+        dstfqdn = ['"' + item + '"' for item in rule['targetFqdns']]
+        dst_ports = [str(protocol['port']) for protocol in rule['protocols']]
+        if ('80' in dst_ports) and ('443' in dst_ports):
             protocols = protocol_https_and_http
-        elif ('80' in rule['dst_ports']):
+        elif ('80' in dst_ports):
             protocols = protocol_http_only
-        elif ('443' in rule['dst_ports']):
+        elif ('443' in dst_ports):
             protocols = protocol_https_only
         else:
             if args.verbose:
-                print("WARNING: unknown ports for App Rule:", str(rule['dst_ports']))
+                print("WARNING: unknown ports for App Rule:", str(dst_ports))
             protocols = protocol_https_only
         # If the first rule in a collection, print the collection header
         if output_app_rule_index == 1:
             # Open the new collection
-            print (rc_header.format(action=rule["action"], name=rc_app_name, priority=rc_app_prio))
+            print (rc_header.format(action='allow', name=rc_app_name, priority=rc_app_prio))
         # If not the first rule in a collection, print a ',' to separate JSON objects
         else:
             print('                            ,')
         # Output text
         try:
             print(app_rule_json.format(name=rule['name'], srcips=','.join(srcaddr), dstips=','.join(dstaddr), dstfqdns=','.join(dstfqdn), protocols=protocols))
-            # .format(name=rule["name"], srcip=' '.join(rule["srcaddr"]), dstip=' '.join(rule["dstaddr"]), dstports=' '.join(rule["dstports"]), prot=' '.join(rule["protocols"]), action=new_policy["action"], azfw_policy_name=azfw_policy_name, priority=str(priority), rg=rg, rcg_name=azfw_collection_group))
         except Exception as e:
             print ("Error", str(e),"when printing rule", str(rule))
             pass
@@ -329,7 +342,7 @@ if args.format == "json":
     print (template_footer)
 
 # The right way to generate JSON would be creating an object and serialize it
-elif args.format == "jsonnew":
+elif args.format == "json":
     api_version = "2021-02-01"
     azfw_policy_name = args.policy_name
     arm_template = {
@@ -378,7 +391,7 @@ elif args.format == "jsonnew":
         'action': {
             'type': 'allow'
         },
-        'rules': []
+        'rules': net_rules
     }
     resource_app_rc = {
         'ruleCollectionType': 'FirewallPolicyFilterRuleCollection',
@@ -387,7 +400,7 @@ elif args.format == "jsonnew":
         'action': {
             'type': 'allow'
         },
-        'rules': []
+        'rules': app_rules
     }
     resource_rcg['properties']['ruleCollections'].append(resource_net_rc)
     resource_rcg['properties']['ruleCollections'].append(resource_app_rc)
