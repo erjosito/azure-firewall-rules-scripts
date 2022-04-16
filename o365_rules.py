@@ -1,6 +1,7 @@
 import requests
 import argparse
 import json
+import re
 
 # Helper functions
 
@@ -24,6 +25,28 @@ def verify_urls(urls):
                 print("WARNING: URL {0} reduced to {1}".format(url, url[url.find('*'):]))
     return corrected_urls
 
+# Filters out IP addresses based on the args.ip_version parameter (can be ipv4, ipv6 or both)
+def filter_ips(ip_list):
+    # For both versions, dont filter
+    if args.ip_version == 'both':
+        return ip_list
+    else:
+        filtered_ips = []
+        for ip in ip_list:
+            # For 'ipv4', return only those who match the IPv4 check
+            if is_ipv4(ip) and (args.ip_version == 'ipv4'):
+                filtered_ips.append(ip)
+            # For 'ipv6', return only non-IPv4 addresses (assumed to be ipv6 then)
+            elif (not is_ipv4(ip)) and (args.ip_version == 'ipv6'):
+                filtered_ips.append(ip)
+        if args.verbose:
+            print("DEBUG: IP list {0} filtered to {1}".format(str(ip_list), str(filtered_ips)))
+        return filtered_ips
+
+# True if parameter is an ipv4 address
+def is_ipv4(ip_address):
+    return bool(re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?:/\d{1,2}|)$",str(ip_address)))
+
 # Arguments
 parser = argparse.ArgumentParser(description='Update a checklist spreadsheet with JSON-formated Azure Resource Graph results')
 parser.add_argument('--policy-name', dest='policy_name', action='store',
@@ -31,7 +54,10 @@ parser.add_argument('--policy-name', dest='policy_name', action='store',
                     help='Name for the Azure Firewall Policy. The default is "o365policy"')
 parser.add_argument('--format', dest='format', action='store',
                     default="json",
-                    help='output format. Possible values: json, none')
+                    help='Output format. Possible values: json, none')
+parser.add_argument('--ip-version', dest='ip_version', action='store',
+                    default="ipv4",
+                    help='IP version of AzFW rules. Possible values: ipv4, ipv6, both. Default: ipv4')
 parser.add_argument('--verbose', dest='verbose', action='store_true',
                     default=False,
                     help='run in verbose mode (default: False)')
@@ -72,7 +98,7 @@ for endpoint in o365_data:
         cnt_apprules += 1
         if 'urls' in endpoint:
             new_rule = {
-                'name': 'id' + str(endpoint['id']) + str(endpoint['serviceAreaDisplayName']).replace(" ", ""),
+                'name': 'id' + str(endpoint['id']) + '-' + str(endpoint['serviceAreaDisplayName']).replace(" ", ""),
                 'action': 'allow',
                 'dst_fqdn': verify_urls(endpoint['urls']),
                 'dst_ports': str(endpoint['tcpPorts']).split(",")
@@ -85,9 +111,9 @@ for endpoint in o365_data:
         cnt_netrules_ip += 1
         if ('ips' in endpoint) and (('tcpPorts' in endpoint) or ('udpPorts' in endpoint)):
             new_rule = {
-                'name': 'id' + str(endpoint['id']) + str(endpoint['serviceAreaDisplayName']).replace(" ", ""),
+                'name': 'id' + str(endpoint['id']) + '-' + str(endpoint['serviceAreaDisplayName']).replace(" ", ""),
                 'action': 'allow',
-                'dst_ip': endpoint['ips'],
+                'dst_ip': filter_ips(endpoint['ips']),
                 'dst_fqdn': ''
             }
             if 'tcpPorts' in endpoint:
@@ -112,7 +138,7 @@ for endpoint in o365_data:
         cnt_netrules_fqdn += 1
         if ('urls' in endpoint) and (('tcpPorts' in endpoint) or ('udpPorts' in endpoint)):
             new_rule = {
-                'name': 'id' + str(endpoint['id']) + str(endpoint['serviceAreaDisplayName']).replace(" ", ""),
+                'name': 'id' + str(endpoint['id']) + '-' + str(endpoint['serviceAreaDisplayName']).replace(" ", ""),
                 'action': 'allow',
                 'dst_ip': '',
                 'dst_fqdn': endpoint['urls'],
@@ -301,6 +327,73 @@ if args.format == "json":
     # Close the JSON code
     print (rcg_footer)
     print (template_footer)
+
+# The right way to generate JSON would be creating an object and serialize it
+elif args.format == "jsonnew":
+    api_version = "2021-02-01"
+    azfw_policy_name = args.policy_name
+    arm_template = {
+        '$schema': 'https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#',
+        'contentVersion': '1.0.0.0',
+        'parameters': {},
+        'variables': {
+            'location': '[resourceGroup().location]'
+        },
+        'resources': []
+    }
+    resource_policy = {
+        'type': 'Microsoft.Network/firewallPolicies',
+        'apiVersion': api_version,
+        'name': azfw_policy_name,
+        'location': '[variables(\'location\')]',
+        'properties': {
+            'sku': {
+                'tier': 'Standard'
+            },
+            'dnsSettings': {
+                'servers': [],
+                'enableProxy': 'true'
+            },
+            'threatIntelMode': 'Alert'
+        }
+    }
+    arm_template['resources'].append(resource_policy)
+    resource_rcg = {
+        'type': 'Microsoft.Network/firewallPolicies/ruleCollectionGroups',
+        'apiVersion': api_version,
+        'name': azfw_policy_name + '/' + rcg_name,
+        'location': '[variables(\'location\')]',
+        'dependsOn': [
+            '[resourceId(\'Microsoft.Network/firewallPolicies\', \'' + azfw_policy_name +'\')]'
+        ],
+        'properties': {
+            'priority': rcg_prio,
+            'ruleCollections': []
+        }
+    }
+    resource_net_rc = {
+        'ruleCollectionType': 'FirewallPolicyFilterRuleCollection',
+        'name': rc_net_name,
+        'priority': rc_net_prio,
+        'action': {
+            'type': 'allow'
+        },
+        'rules': []
+    }
+    resource_app_rc = {
+        'ruleCollectionType': 'FirewallPolicyFilterRuleCollection',
+        'name': rc_app_name,
+        'priority': rc_app_prio,
+        'action': {
+            'type': 'allow'
+        },
+        'rules': []
+    }
+    resource_rcg['properties']['ruleCollections'].append(resource_net_rc)
+    resource_rcg['properties']['ruleCollections'].append(resource_app_rc)
+    arm_template['resources'].append(resource_rcg)
+    print(json.dumps(arm_template))
+
 elif args.format == "none":
     if args.verbose:
         print('DEBUG: {0} endpoints analized: {1} app rules, {2} FQDN-based net rules and {3} IP-based net rules'.format(str(cnt_endpoints), str(cnt_apprules), str(cnt_netrules_fqdn), str(cnt_netrules_ip)))
