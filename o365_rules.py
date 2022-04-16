@@ -64,9 +64,12 @@ parser.add_argument('--format', dest='format', action='store',
 parser.add_argument('--ip-version', dest='ip_version', action='store',
                     default="ipv4",
                     help='IP version of AzFW rules. Possible values: ipv4, ipv6, both. Default: ipv4')
+parser.add_argument('--pretty', dest='pretty', action='store_true',
+                    default=False,
+                    help='Print JSON in pretty mode (default: False)')
 parser.add_argument('--verbose', dest='verbose', action='store_true',
                     default=False,
-                    help='run in verbose mode (default: False)')
+                    help='Run in verbose mode (default: False)')
 args = parser.parse_args()
 
 # Variables
@@ -405,7 +408,10 @@ elif args.format == "json":
     resource_rcg['properties']['ruleCollections'].append(resource_net_rc)
     resource_rcg['properties']['ruleCollections'].append(resource_app_rc)
     arm_template['resources'].append(resource_rcg)
-    print(json.dumps(arm_template))
+    if args.pretty:
+        print(json.dumps(arm_template, indent=4, sort_keys=True))
+    else:
+        print(json.dumps(arm_template))
 
 elif args.format == "none":
     if args.verbose:
