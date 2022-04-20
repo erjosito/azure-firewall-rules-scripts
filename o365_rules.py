@@ -39,8 +39,8 @@ def filter_ips(ip_list):
             # For 'ipv6', return only non-IPv4 addresses (assumed to be ipv6 then)
             elif (not is_ipv4(ip)) and (args.ip_version == 'ipv6'):
                 filtered_ips.append(ip)
-        if args.verbose:
-            print("DEBUG: IP list {0} filtered to {1}".format(str(ip_list), str(filtered_ips)))
+        # if args.verbose:
+        #     print("DEBUG: IP list {0} filtered to {1}".format(str(ip_list), str(filtered_ips)))
         return filtered_ips
 
 # True if parameter is an ipv4 address
@@ -52,6 +52,12 @@ parser = argparse.ArgumentParser(description='Update a checklist spreadsheet wit
 parser.add_argument('--policy-name', dest='policy_name', action='store',
                     default="o365policy",
                     help='Name for the Azure Firewall Policy. The default is "o365policy"')
+parser.add_argument('--policy-sku', dest='policy_sku', action='store',
+                    default="Standard",
+                    help='SKU for the Azure Firewall Policy. Possible values: Standard, Premium (default: Standard)')
+parser.add_argument('--do-not-create-policy', dest='dont_create_policy', action='store_true',
+                    default=False,
+                    help='If specified, do not include ARM code for the policy, only for the rule collection group. Use if the policy already exists.')
 parser.add_argument('--rcg-name', dest='rcg_name', action='store',
                     default="o365",
                     help='Name for the Rule Collection Group to create in the Azure Firewall Policy. The default is "o365"')
@@ -102,27 +108,10 @@ cnt_netrules_fqdn = 0
 cnt_endpoints = 0
 for endpoint in o365_data:
     cnt_endpoints += 1
-    # App Rule
-    if ('tcpPorts' in endpoint) and ((endpoint['tcpPorts'] == "80,443") or (endpoint['tcpPorts'] == "443") or (endpoint['tcpPorts'] == "80")):
-        cnt_apprules += 1
-        if 'urls' in endpoint:
-            new_rule = {
-                'name': 'id' + str(endpoint['id']) + '-' + str(endpoint['serviceAreaDisplayName']).replace(" ", ""),
-                'ruleType': 'ApplicationRule',
-                'sourceAddresses': [ '*' ],
-                'targetFqdns': verify_urls(endpoint['urls']),
-                'protocols': []
-            }
-            dst_ports = str(endpoint['tcpPorts']).split(",")
-            if '80' in dst_ports:
-                new_rule['protocols'].append({'protocolType': 'Http', 'port': 80})
-            if '443' in dst_ports:
-                new_rule['protocols'].append({'protocolType': 'Https', 'port': 443})
-            app_rules.append(new_rule)
-        else:
-            print('ERROR Endpoint ID {0} is web-based but does not have URLs'.format(endpoint['id']))
+
+
     # IP-based Net Rule
-    elif (('urls' in endpoint) and urls_contain_wildcard(endpoint['urls'])) or not ('urls' in endpoint):
+    if ('ips' in endpoint):
         cnt_netrules_ip += 1
         if ('ips' in endpoint) and (('tcpPorts' in endpoint) or ('udpPorts' in endpoint)):
             new_rule = {
@@ -149,6 +138,26 @@ for endpoint in o365_data:
                 print('ERROR: Endpoint ID {0} is IP-based with wildcards, but does not have udpPorts'.format(endpoint['id']))
             if args.verbose:
                 print('DEBUG: endpoint:', str(endpoint))
+
+    # App Rule
+    elif ('tcpPorts' in endpoint) and ((endpoint['tcpPorts'] == "80,443") or (endpoint['tcpPorts'] == "443") or (endpoint['tcpPorts'] == "80")):
+        cnt_apprules += 1
+        if 'urls' in endpoint:
+            new_rule = {
+                'name': 'id' + str(endpoint['id']) + '-' + str(endpoint['serviceAreaDisplayName']).replace(" ", ""),
+                'ruleType': 'ApplicationRule',
+                'sourceAddresses': [ '*' ],
+                'targetFqdns': verify_urls(endpoint['urls']),
+                'protocols': []
+            }
+            dst_ports = str(endpoint['tcpPorts']).split(",")
+            if '80' in dst_ports:
+                new_rule['protocols'].append({'protocolType': 'Http', 'port': 80})
+            if '443' in dst_ports:
+                new_rule['protocols'].append({'protocolType': 'Https', 'port': 443})
+            app_rules.append(new_rule)
+        else:
+            print('ERROR Endpoint ID {0} is web-based but does not have URLs'.format(endpoint['id']))
     # FQDN-based Net Rule
     else:
         cnt_netrules_fqdn += 1
@@ -182,170 +191,8 @@ for endpoint in o365_data:
 # Output #
 ##########
 
-if args.format == "jsonold":
-    # api_version = "2020-11-01"
-    api_version = "2021-02-01"
-    azfw_policy_name = args.policy_name
-    template_header = """{
-    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": { },
-    "variables": {
-        "location": "[resourceGroup().location]"
-    },
-    "resources": ["""
-    template_footer="]}"
-    policy_resource="""        {{
-            "type": "Microsoft.Network/firewallPolicies",
-            "apiVersion": "{api_version}",
-            "name": "{azfw_policy_name}",
-            "location": "[variables('location')]",
-            "properties": {{
-                "sku": {{
-                    "tier": "Standard"
-                }},
-                "dnsSettings": {{
-                    "servers": [],
-                    "enableProxy": true
-                }},
-                "threatIntelMode": "Alert"
-            }}
-        }},"""
-    rcg_header = """        {{
-            "type": "Microsoft.Network/firewallPolicies/ruleCollectionGroups",
-            "apiVersion": "{api_version}",
-            "name": "{azfw_policy_name}/{rcg_name}",
-            "location": "[variables('location')]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Network/firewallPolicies', '{azfw_policy_name}')]"
-            ],
-            "properties": {{
-                "priority": {rcg_prio},
-                "ruleCollections": ["""
-    rc_header = """                  {{
-                        "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
-                        "name": "{name}",
-                        "priority": {priority},
-                        "action": {{
-                            "type": "{action}"
-                        }},
-                        "rules": ["""
-    net_rule_json = """                            {{
-                                "ruleType": "NetworkRule",
-                                "name": "{name}",
-                                "ipProtocols": [
-                                    {protocols}
-                                ],
-                                "sourceAddresses": [
-                                    {srcips}
-                                ],
-                                "sourceIpGroups": [],
-                                "destinationAddresses": [
-                                    {dstips}
-                                ],
-                                "destinationIpGroups": [],
-                                "destinationFqdns": [
-                                    {dstfqdns}
-                                ],
-                                "destinationPorts": [
-                                    {dstports}
-                                ]
-                            }}"""
-    app_rule_json = """                            {{
-                                "ruleType": "ApplicationRule",
-                                "name": "{name}",
-                                "terminateTLS": false,
-                                "protocols": [
-                                    {protocols}
-                                ],
-                                "sourceAddresses": [
-                                    {srcips}
-                                ],
-                                "fqdnTags": [],
-                                "webCategories": [],
-                                "targetUrls": [],
-                                "destinationAddresses": [],
-                                "targetFqdns": [
-                                    {dstfqdns}
-                                ]
-                            }}"""
-    protocol_https_only = """{ "protocolType": "Https", "port": 443 }"""
-    protocol_http_only = """{ "protocolType": "Http", "port": 80 }"""
-    protocol_https_and_http = """{ "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }"""
-    rc_footer = "                        ]}"
-    rcg_footer = "      ] } }"
-
-    print (template_header)
-    print (policy_resource.format(azfw_policy_name=azfw_policy_name, api_version=api_version))
-
-    # RCG
-    print (rcg_header.format(azfw_policy_name=azfw_policy_name, rcg_name=rcg_name, rcg_prio=rcg_prio, api_version=api_version))
-
-    # Net rules
-    output_net_rule_index = 1
-    for rule in net_rules:
-        # Add quotes to the string elements to make them JSON-conform
-        protocols = ['"' + item + '"' for item in rule['ipProtocols']]
-        srcaddr = [ '"*"' ]
-        dstaddr = ['"' + item + '"' for item in rule['destinationAddresses']]
-        dstfqdn = ['"' + item + '"' for item in rule['destinationFqdns']]
-        # If the first rule in a collection, print the collection header
-        if output_net_rule_index == 1:
-            # Open the new collection
-            print (rc_header.format(action='allow', name=rc_net_name, priority=rc_net_prio))
-        # If not the first rule in a collection, print a ',' to separate JSON objects
-        else:
-            print('                            ,')
-        # Output text
-        try:
-            print(net_rule_json.format(name=rule['name'], protocols=','.join(protocols), srcips=','.join(srcaddr), dstips=','.join(dstaddr), dstfqdns=','.join(dstfqdn), dstports=','.join(rule["destinationPorts"])))
-        except Exception as e:
-            print ("Error", str(e),"when printing rule", str(rule))
-            pass
-        # Increment counters
-        output_net_rule_index += 1
-    print (rc_footer, ',')
-
-    # App rules
-    output_app_rule_index = 1
-    for rule in app_rules:
-        # Add quotes to the string elements to make them JSON-conform
-        srcaddr = [ '"*"' ]
-        dstfqdn = ['"' + item + '"' for item in rule['targetFqdns']]
-        dst_ports = [str(protocol['port']) for protocol in rule['protocols']]
-        if ('80' in dst_ports) and ('443' in dst_ports):
-            protocols = protocol_https_and_http
-        elif ('80' in dst_ports):
-            protocols = protocol_http_only
-        elif ('443' in dst_ports):
-            protocols = protocol_https_only
-        else:
-            if args.verbose:
-                print("WARNING: unknown ports for App Rule:", str(dst_ports))
-            protocols = protocol_https_only
-        # If the first rule in a collection, print the collection header
-        if output_app_rule_index == 1:
-            # Open the new collection
-            print (rc_header.format(action='allow', name=rc_app_name, priority=rc_app_prio))
-        # If not the first rule in a collection, print a ',' to separate JSON objects
-        else:
-            print('                            ,')
-        # Output text
-        try:
-            print(app_rule_json.format(name=rule['name'], srcips=','.join(srcaddr), dstips=','.join(dstaddr), dstfqdns=','.join(dstfqdn), protocols=protocols))
-        except Exception as e:
-            print ("Error", str(e),"when printing rule", str(rule))
-            pass
-        # Increment counters
-        output_app_rule_index += 1
-    print (rc_footer)
-
-    # Close the JSON code
-    print (rcg_footer)
-    print (template_footer)
-
-# The right way to generate JSON would be creating an object and serialize it
-elif args.format == "json":
+# Generate JSON would be creating an object and serialize it
+if args.format == "json":
     api_version = "2021-02-01"
     azfw_policy_name = args.policy_name
     arm_template = {
@@ -357,36 +204,37 @@ elif args.format == "json":
         },
         'resources': []
     }
-    resource_policy = {
-        'type': 'Microsoft.Network/firewallPolicies',
-        'apiVersion': api_version,
-        'name': azfw_policy_name,
-        'location': '[variables(\'location\')]',
-        'properties': {
-            'sku': {
-                'tier': 'Standard'
-            },
-            'dnsSettings': {
-                'servers': [],
-                'enableProxy': 'true'
-            },
-            'threatIntelMode': 'Alert'
+    if not args.dont_create_policy:
+        resource_policy = {
+            'type': 'Microsoft.Network/firewallPolicies',
+            'apiVersion': api_version,
+            'name': azfw_policy_name,
+            'location': '[variables(\'location\')]',
+            'properties': {
+                'sku': {
+                    'tier': args.policy_sku
+                },
+                'dnsSettings': {
+                    'enableProxy': 'true'
+                },
+                'threatIntelMode': 'Alert'
+            }
         }
-    }
-    arm_template['resources'].append(resource_policy)
+        arm_template['resources'].append(resource_policy)
     resource_rcg = {
         'type': 'Microsoft.Network/firewallPolicies/ruleCollectionGroups',
         'apiVersion': api_version,
         'name': azfw_policy_name + '/' + rcg_name,
+        'dependsOn': [],
         'location': '[variables(\'location\')]',
-        'dependsOn': [
-            '[resourceId(\'Microsoft.Network/firewallPolicies\', \'' + azfw_policy_name +'\')]'
-        ],
         'properties': {
             'priority': rcg_prio,
             'ruleCollections': []
         }
     }
+    if not args.dont_create_policy:
+        resource_rcg['dependsOn'].append('[resourceId(\'Microsoft.Network/firewallPolicies\', \'' + azfw_policy_name +'\')]'),
+
     resource_net_rc = {
         'ruleCollectionType': 'FirewallPolicyFilterRuleCollection',
         'name': rc_net_name,
