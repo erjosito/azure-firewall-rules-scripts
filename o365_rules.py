@@ -48,7 +48,7 @@ def is_ipv4(ip_address):
     return bool(re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?:/\d{1,2}|)$",str(ip_address)))
 
 # Arguments
-parser = argparse.ArgumentParser(description='Update a checklist spreadsheet with JSON-formated Azure Resource Graph results')
+parser = argparse.ArgumentParser(description='Generate an ARM template to create a Rule Collection Group in an Azure policy with rules that allow access to M365 endpoints.')
 parser.add_argument('--policy-name', dest='policy_name', action='store',
                     default="o365policy",
                     help='Name for the Azure Firewall Policy. The default is "o365policy"')
