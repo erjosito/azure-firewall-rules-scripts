@@ -129,62 +129,82 @@ def contains_ipv4(text):
 def append_rule(rule_to_be_appended, rules_to_append_to):
     if log_level >= 8:
         print("DEBUG: appending to rules:", str(rule_to_be_appended), file=sys.stderr)
-    exist_addresses = bool(len(rule_to_be_appended['destinationAddresses']) > 0)
-    exist_fqdns = bool(len(rule_to_be_appended['destinationFqdns']) > 0)
-    exist_ipgroups = bool(len(rule_to_be_appended['destinationIpGroups']) > 0)
-    only_exist_addresses = exist_addresses and not (exist_fqdns or exist_ipgroups)
-    only_exist_fqdns = exist_fqdns and not (exist_addresses or exist_ipgroups)
-    only_exist_ipgroups = exist_ipgroups and not (exist_addresses or exist_fqdns)
-    exist_addresses_and_fqdns = exist_addresses and exist_fqdns and not exist_ipgroups
-    exist_addresses_and_ipgroups = exist_addresses and exist_ipgroups and not exist_fqdns
-    exist_fqdns_and_ipgroups = exist_fqdns and exist_ipgroups and not exist_addresses
-    exist_all = exist_addresses and exist_fqdns and exist_ipgroups
-    if only_exist_addresses or only_exist_fqdns or only_exist_ipgroups:
-        rules_to_append_to.append(rule_to_be_appended)
-    elif exist_addresses_and_fqdns:
-        rule1 = copy.copy(rule_to_be_appended)
-        rule2 = copy.copy(rule_to_be_appended)
-        rule1['destinationAddresses'] = []
-        rule2['destinationFqdns'] = []
-        rule1['name'] = rule_to_be_appended['name'] + "-1"
-        rule2['name'] = rule_to_be_appended['name'] + "-2"
-        rules_to_append_to.append(rule1)
-        rules_to_append_to.append(rule2)
-    elif exist_addresses_and_ipgroups:
-        rule1 = copy.copy(rule_to_be_appended)
-        rule2 = copy.copy(rule_to_be_appended)
-        rule1['destinationAddresses'] = []
-        rule2['destinationIpGroups'] = []
-        rule1['name'] = rule_to_be_appended['name'] + "-1"
-        rule2['name'] = rule_to_be_appended['name'] + "-2"
-        rules_to_append_to.append(rule1)
-        rules_to_append_to.append(rule2)
-    elif exist_fqdns_and_ipgroups:
-        rule1 = copy.copy(rule_to_be_appended)
-        rule2 = copy.copy(rule_to_be_appended)
-        rule1['destinationFqdns'] = []
-        rule2['destinationIpGroups'] = []
-        rule1['name'] = rule_to_be_appended['name'] + "-1"
-        rule2['name'] = rule_to_be_appended['name'] + "-2"
-        rules_to_append_to.append(rule1)
-        rules_to_append_to.append(rule2)
-    elif exist_all:
-        rule1 = copy.copy(rule_to_be_appended)
-        rule2 = copy.copy(rule_to_be_appended)
-        rule3 = copy.copy(rule_to_be_appended)
-        rule1['destinationFqdns'] = []
-        rule1['destinationIpGroups'] = []
-        rule2['destinationAddresses'] = []
-        rule2['destinationIpGroups'] = []
-        rule3['destinationAddresses'] = []
-        rule3['destinationFqdns'] = []
-        rule1['name'] = rule_to_be_appended['name'] + "-1"
-        rule2['name'] = rule_to_be_appended['name'] + "-2"
-        rule3['name'] = rule_to_be_appended['name'] + "-3"
-        rules_to_append_to.append(rule1)
-        rules_to_append_to.append(rule2)
-        rules_to_append_to.append(rule3)
+    split_rule_counter = 0
+    src_fields = ('sourceAddresses', 'sourceIpGroups')
+    dst_fields = ('destinationAddresses', 'destinationIpGroups', 'destinationFqdns')
+    all_fields = src_fields + dst_fields
+    for src_field in src_fields:
+        for dst_field in dst_fields:
+            # Only look at combinations where the src_field and dst_field are non-zero
+            if len(rule_to_be_appended[src_field]) > 0 and len(rule_to_be_appended[dst_field]) > 0:
+                temp_rule = copy.copy(rule_to_be_appended)
+                split_rule_counter += 1
+                temp_rule['name'] = temp_rule['name'] + '-' + str(split_rule_counter)
+                # Blank all the rest fieldsd
+                for blank_field in all_fields:
+                    if blank_field != src_field and blank_field != dst_field:
+                        temp_rule [blank_field] = []
+                rules_to_append_to.append(temp_rule)
+    if split_rule_counter > 1:
+        if log_level >= 7:
+            print("DEBUG: Palo Alto rule id {0} has been split in {1} Azure Firewall rules".format(rule_to_be_appended['id'], split_rule_counter), file=sys.stderr)
     return rules_to_append_to
+    # exist_addresses = bool(len(rule_to_be_appended['destinationAddresses']) > 0)
+    # exist_fqdns = bool(len(rule_to_be_appended['destinationFqdns']) > 0)
+    # exist_ipgroups = bool(len(rule_to_be_appended['destinationIpGroups']) > 0)
+    # only_exist_addresses = exist_addresses and not (exist_fqdns or exist_ipgroups)
+    # only_exist_fqdns = exist_fqdns and not (exist_addresses or exist_ipgroups)
+    # only_exist_ipgroups = exist_ipgroups and not (exist_addresses or exist_fqdns)
+    # exist_addresses_and_fqdns = exist_addresses and exist_fqdns and not exist_ipgroups
+    # exist_addresses_and_ipgroups = exist_addresses and exist_ipgroups and not exist_fqdns
+    # exist_fqdns_and_ipgroups = exist_fqdns and exist_ipgroups and not exist_addresses
+    # exist_all = exist_addresses and exist_fqdns and exist_ipgroups
+    # if only_exist_addresses or only_exist_fqdns or only_exist_ipgroups:
+    #     rules_to_append_to.append(rule_to_be_appended)
+    # elif exist_addresses_and_fqdns:
+    #     rule1 = copy.copy(rule_to_be_appended)
+    #     rule2 = copy.copy(rule_to_be_appended)
+    #     rule1['destinationAddresses'] = []
+    #     rule2['destinationFqdns'] = []
+    #     rule1['name'] = rule_to_be_appended['name'] + "-1"
+    #     rule2['name'] = rule_to_be_appended['name'] + "-2"
+    #     rules_to_append_to.append(rule1)
+    #     rules_to_append_to.append(rule2)
+    # elif exist_addresses_and_ipgroups:
+    #     rule1 = copy.copy(rule_to_be_appended)
+    #     rule2 = copy.copy(rule_to_be_appended)
+    #     rule1['destinationAddresses'] = []
+    #     rule2['destinationIpGroups'] = []
+    #     rule1['name'] = rule_to_be_appended['name'] + "-1"
+    #     rule2['name'] = rule_to_be_appended['name'] + "-2"
+    #     rules_to_append_to.append(rule1)
+    #     rules_to_append_to.append(rule2)
+    # elif exist_fqdns_and_ipgroups:
+    #     rule1 = copy.copy(rule_to_be_appended)
+    #     rule2 = copy.copy(rule_to_be_appended)
+    #     rule1['destinationFqdns'] = []
+    #     rule2['destinationIpGroups'] = []
+    #     rule1['name'] = rule_to_be_appended['name'] + "-1"
+    #     rule2['name'] = rule_to_be_appended['name'] + "-2"
+    #     rules_to_append_to.append(rule1)
+    #     rules_to_append_to.append(rule2)
+    # elif exist_all:
+    #     rule1 = copy.copy(rule_to_be_appended)
+    #     rule2 = copy.copy(rule_to_be_appended)
+    #     rule3 = copy.copy(rule_to_be_appended)
+    #     rule1['destinationFqdns'] = []
+    #     rule1['destinationIpGroups'] = []
+    #     rule2['destinationAddresses'] = []
+    #     rule2['destinationIpGroups'] = []
+    #     rule3['destinationAddresses'] = []
+    #     rule3['destinationFqdns'] = []
+    #     rule1['name'] = rule_to_be_appended['name'] + "-1"
+    #     rule2['name'] = rule_to_be_appended['name'] + "-2"
+    #     rule3['name'] = rule_to_be_appended['name'] + "-3"
+    #     rules_to_append_to.append(rule1)
+    #     rules_to_append_to.append(rule2)
+    #     rules_to_append_to.append(rule3)
+    # return rules_to_append_to
 
 
 # Arguments
@@ -289,6 +309,13 @@ else:
     if log_level >= 3:
         print ("ERROR: {0} is not a directory".format(csv_folder), file=sys.stderr)
     sys.exit(1)
+
+# Verify that we have at least 1 CSV file
+if len(csv_file_list) == 0:
+    if log_level >= 3:
+        print ("ERROR: no CSV files could be found in directory {0}".format(csv_folder), file=sys.stderr)
+    sys.exit(1)
+
 
 # Global variables to contain the ruleset
 svc_groups = []
@@ -440,11 +467,15 @@ def resolve_addresses (text_list, address_list, fqdn_list, ipgroup_list, functio
                     text = text[7:].replace('-', '/')
                     text = text.replace('.', ':')
                     address_list.append(text)
+            # If it is a service tag
+            elif text[:10].lower() == 'servicetag':
+                if 'azurestorage' in text.lower():
+                    address_list.append('Storage')
             # Special keywords
-            elif text == 'ALL_IPv4':
+            elif text.lower() == 'all_ipv4':
                 if args.ip_version in ('ipv4', 'both'):
                     address_list.append('0.0.0.0/0')
-            elif text == 'ALL_IPv6':
+            elif text.lower() == 'all_ipv6':
                 if args.ip_version in ('ipv6', 'both'):
                     address_list.append('::/0')
             # Maybe it is already an IP
@@ -472,7 +503,7 @@ def resolve_addresses (text_list, address_list, fqdn_list, ipgroup_list, functio
                         address_list, fqdn_list, ipgroup_list = resolve_addresses(ip_grp_found['addresses'], address_list, fqdn_list, ipgroup_list)
                 else:
                     if log_level >= 4 and function_debug:
-                        print('WARNING: IP address {0} could not be resolved'.format(text), file=sys.stderr)
+                        print('WARNING: IP address {0} could not be resolved)'.format(text), file=sys.stderr)
                     # Return unchanged parameters
                     return address_list, fqdn_list, ipgroup_list
     except Exception as e:
@@ -655,15 +686,15 @@ for rule in rules:
             # Verify that there is at least a valid destination
             if not (len(new_rule['destinationAddresses']) > 0 or len(new_rule['destinationFqdns']) > 0 or len(new_rule['destinationIpGroups']) > 0):
                 if log_level >= 3:
-                    print("ERROR: For rule '{0} - {1}' it wasn't possible to derive any destination addresses/FQDNs/IPgroups from {2}".format(rule['id'], rule['name'], str(rule['dst_address'])), file=sys.stderr)
+                    print("ERROR: For rule '{0} - {1}' it wasn't possible to derive any destination addresses/FQDNs/IPgroups from {2}. Note that the IP version to process is set to {3}".format(rule['id'], rule['name'], str(rule['dst_address']), args.ip_version), file=sys.stderr)
             # Verify that there is at least a valid source
             if not (len(new_rule['sourceAddresses']) > 0 or len(new_rule['sourceIpGroups']) > 0):
                 if log_level >= 3:
-                    print("ERROR: For rule '{0} - {1}' it wasn't possible to derive any source addresses/IPgroups from {2}".format(rule['id'], rule['name'], str(rule['src_address'])), file=sys.stderr)
-            # Verify that there are either sourceAddresses or sourceIpGroups but not both
-            elif len(new_rule['sourceAddresses']) > 0 and len(new_rule['sourceIpGroups']) > 0:
-                if log_level >= 3:
-                    print("ERROR: For rule '{0} - {1}' there are both source IP addresses and IP groups, it needs to be split".format(rule['id'], rule['name']), file=sys.stderr)
+                    print("ERROR: For rule '{0} - {1}' it wasn't possible to derive any source addresses/IPgroups from {2}. Note that the IP version to process is set to {3}".format(rule['id'], rule['name'], str(rule['src_address']), args.ip_version), file=sys.stderr)
+            # # Verify that there are either sourceAddresses or sourceIpGroups but not both
+            # elif len(new_rule['sourceAddresses']) > 0 and len(new_rule['sourceIpGroups']) > 0:
+            #     if log_level >= 3:
+            #         print("ERROR: For rule '{0} - {1}' there are both source IP addresses and IP groups, it needs to be split".format(rule['id'], rule['name']), file=sys.stderr)
             # Verify that there are no FQDNs for the sources
             elif len(src_fqdns) > 0:
                 if log_level >= 3:
