@@ -1,0 +1,1661 @@
+{
+  "type": "Microsoft.Network/firewallPolicies/ruleCollectionGroups",
+  "apiVersion": "2021-02-01",
+  "name": "o365policy/o365",
+  "location": "[variables('location')]",
+  "dependsOn": [
+    "[resourceId('Microsoft.Network/firewallPolicies', 'o365policy')]"
+  ],
+  "properties": {
+    "priority": 10000,
+    "ruleCollections": [
+      {
+        "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
+        "name": "o365net",
+        "priority": 10900,
+        "action": {
+          "type": "allow"
+        },
+        "rules": [
+          {
+            "ruleType": "NetworkRule",
+            "name": "id2-ExchangeOnline",
+            "ipProtocols": [
+              "tcp"
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "sourceIpGroups": [],
+            "destinationAddresses": [
+              
+            ],
+            "destinationIpGroups": [],
+            "destinationFqdns": [
+              "smtp.office365.com"
+            ],
+            "destinationPorts": [
+              587
+            ]
+          }
+          ,
+          {
+            "ruleType": "NetworkRule",
+            "name": "id5-ExchangeOnline",
+            "ipProtocols": [
+              "tcp"
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "sourceIpGroups": [],
+            "destinationAddresses": [
+              "13.107.6.152/31","13.107.18.10/31","13.107.128.0/22","23.103.160.0/20","40.96.0.0/13","40.104.0.0/15","52.96.0.0/14","131.253.33.215/32","132.245.0.0/16","150.171.32.0/22","204.79.197.215/32"
+            ],
+            "destinationIpGroups": [],
+            "destinationFqdns": [
+              
+            ],
+            "destinationPorts": [
+              143,993
+            ]
+          }
+          ,
+          {
+            "ruleType": "NetworkRule",
+            "name": "id6-ExchangeOnline",
+            "ipProtocols": [
+              "tcp"
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "sourceIpGroups": [],
+            "destinationAddresses": [
+              "13.107.6.152/31","13.107.18.10/31","13.107.128.0/22","23.103.160.0/20","40.96.0.0/13","40.104.0.0/15","52.96.0.0/14","131.253.33.215/32","132.245.0.0/16","150.171.32.0/22","204.79.197.215/32"
+            ],
+            "destinationIpGroups": [],
+            "destinationFqdns": [
+              
+            ],
+            "destinationPorts": [
+              995
+            ]
+          }
+          ,
+          {
+            "ruleType": "NetworkRule",
+            "name": "id10-ExchangeOnline",
+            "ipProtocols": [
+              "tcp"
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "sourceIpGroups": [],
+            "destinationAddresses": [
+              "40.92.0.0/15","40.107.0.0/16","52.100.0.0/14","104.47.0.0/17"
+            ],
+            "destinationIpGroups": [],
+            "destinationFqdns": [
+              
+            ],
+            "destinationPorts": [
+              25
+            ]
+          }
+          ,
+          {
+            "ruleType": "NetworkRule",
+            "name": "id11-SkypeforBusinessOnlineandMicrosoftTeams",
+            "ipProtocols": [
+              "udp"
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "sourceIpGroups": [],
+            "destinationAddresses": [
+              "13.107.64.0/18","52.112.0.0/14","52.120.0.0/14"
+            ],
+            "destinationIpGroups": [],
+            "destinationFqdns": [
+              
+            ],
+            "destinationPorts": [
+              3478,3479,3480,3481
+            ]
+          }
+        ]} ,
+      {
+        "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
+        "name": "o365app",
+        "priority": 11000,
+        "action": {
+          "type": "allow"
+        },
+        "rules": [
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id1-ExchangeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "outlook.office.com","outlook.office365.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id3-ExchangeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "r1.res.office365.com","r3.res.office365.com","r4.res.office365.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id8-ExchangeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.outlook.com","attachments.office.net"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id9-ExchangeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.protection.outlook.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id12-SkypeforBusinessOnlineandMicrosoftTeams",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.lync.com","*.teams.microsoft.com","teams.microsoft.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id13-SkypeforBusinessOnlineandMicrosoftTeams",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.broadcast.skype.com","broadcast.skype.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id15-SkypeforBusinessOnlineandMicrosoftTeams",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.sfbassets.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id16-SkypeforBusinessOnlineandMicrosoftTeams",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.keydelivery.mediaservices.windows.net","*.streaming.mediaservices.windows.net","mlccdn.blob.core.windows.net"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id17-SkypeforBusinessOnlineandMicrosoftTeams",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "aka.ms"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id18-SkypeforBusinessOnlineandMicrosoftTeams",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.users.storage.live.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id19-SkypeforBusinessOnlineandMicrosoftTeams",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.adl.windows.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id22-SkypeforBusinessOnlineandMicrosoftTeams",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.skypeforbusiness.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id26-SkypeforBusinessOnlineandMicrosoftTeams",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.msedge.net","compass-ssl.microsoft.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id27-SkypeforBusinessOnlineandMicrosoftTeams",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.mstea.ms","*.secure.skypeassets.com","mlccdnprod.azureedge.net"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id31-SharePointOnlineandOneDriveforBusiness",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.sharepoint.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id32-SharePointOnlineandOneDriveforBusiness",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "ssw.live.com","storage.live.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id33-SharePointOnlineandOneDriveforBusiness",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.search.production.apac.trafficmanager.net","*.search.production.emea.trafficmanager.net","*.search.production.us.trafficmanager.net"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id35-SharePointOnlineandOneDriveforBusiness",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.wns.windows.com","admin.onedrive.com","officeclient.microsoft.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id36-SharePointOnlineandOneDriveforBusiness",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "g.live.com","oneclient.sfx.ms"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id37-SharePointOnlineandOneDriveforBusiness",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.sharepointonline.com","spoprod-a.akamaihd.net"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id39-SharePointOnlineandOneDriveforBusiness",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.gr.global.aa-rt.sharepoint.com","*.svc.ms","*-admin.sharepoint.com","*-files.sharepoint.com","*-myfiles.sharepoint.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id41-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.microsoftstream.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id43-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "nps.onyx.azure.net"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id44-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.azureedge.net","*.media.azure.net","*.streaming.mediaservices.windows.net"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id45-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.keydelivery.mediaservices.windows.net"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id46-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.officeapps.live.com","*.online.office.com","office.live.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id47-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.cdn.office.net","contentstorage.osi.office.net"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id49-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.onenote.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id50-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.microsoft.com","*.office.net"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id51-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*cdn.onenote.net"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id53-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "ajax.aspnetcdn.com","apis.live.net","officeapps.live.com","www.onedrive.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id56-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.msftidentity.com","*.msidentity.com","account.activedirectory.windowsazure.com","accounts.accesscontrol.windows.net","adminwebservice.microsoftonline.com","api.passwordreset.microsoftonline.com","autologon.microsoftazuread-sso.com","becws.microsoftonline.com","clientconfig.microsoftonline-p.net","companymanager.microsoftonline.com","device.login.microsoftonline.com","graph.microsoft.com","graph.windows.net","login.microsoft.com","login.microsoftonline.com","login.microsoftonline-p.com","login.windows.net","logincert.microsoftonline.com","loginex.microsoftonline.com","login-us.microsoftonline.com","nexus.microsoftonline-p.com","passwordreset.microsoftonline.com","provisioningapi.microsoftonline.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id59-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.hip.live.com","*.microsoftonline.com","*.microsoftonline-p.com","*.msauth.net","*.msauthimages.net","*.msecnd.net","*.msftauth.net","*.msftauthimages.net","*.phonefactor.net","enterpriseregistration.windows.net","management.azure.com","policykeyservice.dc.ad.msft.net"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id64-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.compliance.microsoft.com","*.protection.office.com","*.security.microsoft.com","compliance.microsoft.com","protection.office.com","security.microsoft.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id65-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "account.office.net"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id66-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.portal.cloudappsecurity.com","suite.office.net"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id67-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.blob.core.windows.net"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id68-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "firstpartyapps.oaspapps.com","prod.firstpartyapps.oaspapps.com.akadns.net","telemetryservice.firstpartyapps.oaspapps.com","wus-firstpartyapps.oaspapps.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id69-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.aria.microsoft.com","*.events.data.microsoft.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id70-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.o365weve.com","amp.azure.net","appsforoffice.microsoft.com","assets.onestore.ms","auth.gfx.ms","c1.microsoft.com","dgps.support.microsoft.com","docs.microsoft.com","msdn.microsoft.com","platform.linkedin.com","prod.msocdn.com","shellprod.msocdn.com","support.content.office.net","support.microsoft.com","technet.microsoft.com","videocontent.osi.office.net","videoplayercdn.osi.office.net"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id71-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.office365.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id72-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.cloudapp.net"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id73-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.aadrm.com","*.azurerms.com","*.informationprotection.azure.com","ecn.dev.virtualearth.net","informationprotection.hosting.portal.azure.net"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id75-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.sharepointonline.com","dc.services.visualstudio.com","mem.gfx.ms","staffhub.ms"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id78-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.microsoft.com","*.msocdn.com","*.office.net","*.onmicrosoft.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id79-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "o15.officeredir.microsoft.com","officepreviewredir.microsoft.com","officeredir.microsoft.com","r.office.microsoft.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id83-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "activation.sls.microsoft.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id84-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "crl.microsoft.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id86-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "office15client.microsoft.com","officeclient.microsoft.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id88-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "insertmedia.bing.office.net"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id89-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "go.microsoft.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id91-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "ajax.aspnetcdn.com","cdn.odc.officeapps.live.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id92-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "officecdn.microsoft.com","officecdn.microsoft.com.edgesuite.net"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id93-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.virtualearth.net","c.bing.net","excelbingmap.firstpartyapps.oaspapps.com","ocos-office365-s2s.msedge.net","peoplegraph.firstpartyapps.oaspapps.com","tse1.mm.bing.net","wikipedia.firstpartyapps.oaspapps.com","www.bing.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id95-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.acompli.net","*.outlookmobile.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id96-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "login.windows-ppe.net"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id97-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "account.live.com","login.live.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id105-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "www.acompli.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id114-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.appex.bing.com","*.appex-rf.msn.com","c.bing.com","c.live.com","d.docs.live.net","directory.services.live.com","docs.live.net","partnerservices.getmicrosoftkey.com","signup.live.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id116-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "account.live.com","auth.gfx.ms","login.live.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id117-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.yammer.com","*.yammerusercontent.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id118-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.assets-yammer.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id121-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "www.outlook.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id122-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "eus-www.sway-cdn.com","eus-www.sway-extensions.com","wus-www.sway-cdn.com","wus-www.sway-extensions.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id124-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "sway.com","www.sway.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id125-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.entrust.net","*.geotrust.com","*.omniroot.com","*.public-trust.com","*.symcb.com","*.symcd.com","*.verisign.com","*.verisign.net","apps.identrust.com","cacerts.digicert.com","cert.int-x3.letsencrypt.org","crl.globalsign.com","crl.globalsign.net","crl.identrust.com","crl3.digicert.com","crl4.digicert.com","isrg.trustid.ocsp.identrust.com","mscrl.microsoft.com","ocsp.digicert.com","ocsp.globalsign.com","ocsp.msocsp.com","ocsp2.globalsign.com","ocspx.digicert.com","secure.globalsign.com","www.digicert.com","www.microsoft.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id126-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "officespeech.platform.bing.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id127-SkypeforBusinessOnlineandMicrosoftTeams",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.skype.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id128-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.config.office.net","*.manage.microsoft.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id147-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.office.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id148-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "cdnprod.myanalytics.microsoft.com","myanalytics.microsoft.com","myanalytics-gcc.microsoft.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id149-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "workplaceanalytics.cdn.office.net"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id152-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.microsoftusercontent.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id153-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.azure-apim.net","*.flow.microsoft.com","*.powerapps.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id154-ExchangeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.onmicrosoft.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id156-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.activity.windows.com","activity.windows.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id157-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Http", "port": 80 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "ocsp.int-x3.letsencrypt.org"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id158-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "*.cortana.ai"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id159-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "admin.microsoft.com"
+            ]
+          }
+          ,
+          {
+            "ruleType": "ApplicationRule",
+            "name": "id160-Microsoft365CommonandOfficeOnline",
+            "terminateTLS": false,
+            "protocols": [
+              { "protocolType": "Http", "port": 80 }, { "protocolType": "Https", "port": 443 }
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetUrls": [],
+            "destinationAddresses": [],
+            "targetFqdns": [
+              "cdn.odc.officeapps.live.com","cdn.uci.officeapps.live.com"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
