@@ -383,26 +383,34 @@ def add_lines_to_rules(lines, rules):
         line = line.split(',')
         # ',Name,Location,Tags,Type,Source Zone,Source Address,Source User,Source HIP Profile,Destination Zone,Destination Address,Application,Service,Action,
         # Profile,Options,Target,Rule Usage Rule Usage,Rule Usage Apps Seen,Rule Usage Days With No New Apps,Modified,Created'
-        new_rule = {
-            'id': right_format(line[0]),
-            'name': right_format(line[1]),
-            'type': right_format(line[2]),
-            'src_zone': right_format(line[5]),
-            'src_address': right_format(line[6], return_list=True),
-            'src_user': right_format(line[7]),
-            'src_hip_profile': right_format(line[8]),
-            'dst_zone': right_format(line[9]),
-            'dst_address': right_format(line[10], return_list=True),
-            'application': right_format(line[11]),
-            'service': right_format(line[12], return_list=True),
-            'action': right_format(line[13]),
-            'profile': right_format(line[14]),
-            'options': right_format(line[15]),
-            'target': right_format(line[16])
-        }
-        # if log_level >= 7:
-        #     print("DEBUG: converting CSV line {0} to object {1}".format(line, str(new_rule)))
-        rules.append(new_rule)
+        if len(line) > 15:
+            try:
+                new_rule = {
+                    'id': right_format(line[0]),
+                    'name': right_format(line[1]),
+                    'type': right_format(line[2]),
+                    'src_zone': right_format(line[5]),
+                    'src_address': right_format(line[6], return_list=True),
+                    'src_user': right_format(line[7]),
+                    'src_hip_profile': right_format(line[8]),
+                    'dst_zone': right_format(line[9]),
+                    'dst_address': right_format(line[10], return_list=True),
+                    'application': right_format(line[11]),
+                    'service': right_format(line[12], return_list=True),
+                    'action': right_format(line[13]),
+                    'profile': right_format(line[14]),
+                    'options': right_format(line[15]),
+                    'target': right_format(line[16])
+                }
+                # if log_level >= 7:
+                #     print("DEBUG: converting CSV line {0} to object {1}".format(line, str(new_rule)))
+                rules.append(new_rule)
+            except Exception as e:
+                if log_level >= 3:
+                    print("ERROR: error when processing rule '{0}', skipping this policy- Error message: {1}".format(str(line), str(e)), file=sys.stderr)
+        else:
+            if log_level >= 7:
+                print("DEBUG: skipping line '{0}'".format(str(line)), file=sys.stderr)
     return rules
 
 # Browse the service groups and services and expand the provided list of IP protocols and ports with the found results
@@ -812,7 +820,7 @@ if args.format == "json":
     else:
         print(json.dumps(arm_template))
 
-elif args.output == "none":
+elif args.format == "none":
     if log_level >= 7:
         print('DEBUG: {0} rules analized: {1} app rules, {2} FQDN-based net rules and {3} IP-based net rules'.format(str(cnt_pa_rules), str(cnt_apprules), str(cnt_netrules_fqdn), str(cnt_netrules_ip)))
         print('DEBUG: {2} disabled rules, {0} allow rules and {1} deny rules'.format(str(cnt_allow), str(cnt_deny), str(cnt_disabledrules)))

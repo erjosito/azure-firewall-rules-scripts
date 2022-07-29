@@ -1,0 +1,4 @@
+﻿"Name","Location","Members Count","Addresses","Tags"
+"sqlservers","Shared","2","ip_10.10.10.10;ip_10.10.10.11",""
+"appservers","Shared","2","ip_10.10.20.20;ip_10.10.20.21",""
+"mgmtservers","Shared","2","ip_10.10.30.30;ip_10.10.30.31",""

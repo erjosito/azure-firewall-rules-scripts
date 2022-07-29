@@ -1,0 +1,5 @@
+﻿"Name,""Location"",""Protocol"",""Destination Port"",""Tags"""
+"SQL,""Shared"",""TCP"",""1433"","""""
+"SSH,""Shared"",""TCP"",""22"","""""
+"Web,""Shared"",""TCP"",""80,443"","""""
+"SNMP,""Shared"",""UDP"",""161-162"","""""

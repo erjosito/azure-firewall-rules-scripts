@@ -1,0 +1,167 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {},
+    "resources": [
+        {
+            "apiVersion": "2021-08-01",
+            "location": "[variables('location')]",
+            "name": "azfwpolicy",
+            "properties": {
+                "dnsSettings": {
+                    "enableProxy": "true"
+                },
+                "sku": {
+                    "tier": "Standard"
+                },
+                "threatIntelMode": "Alert"
+            },
+            "type": "Microsoft.Network/firewallPolicies"
+        },
+        {
+            "apiVersion": "2021-08-01",
+            "location": "[variables('location')]",
+            "name": "sqlservers",
+            "properties": {
+                "ipAddresses": [
+                    "10.10.10.10",
+                    "10.10.10.11"
+                ]
+            },
+            "type": "Microsoft.Network/ipGroups"
+        },
+        {
+            "apiVersion": "2021-08-01",
+            "location": "[variables('location')]",
+            "name": "appservers",
+            "properties": {
+                "ipAddresses": [
+                    "10.10.20.20",
+                    "10.10.20.21"
+                ]
+            },
+            "type": "Microsoft.Network/ipGroups"
+        },
+        {
+            "apiVersion": "2021-08-01",
+            "location": "[variables('location')]",
+            "name": "mgmtservers",
+            "properties": {
+                "ipAddresses": [
+                    "10.10.30.30",
+                    "10.10.30.31"
+                ]
+            },
+            "type": "Microsoft.Network/ipGroups"
+        },
+        {
+            "apiVersion": "2021-08-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/firewallPolicies', 'azfwpolicy')]",
+                "[resourceId('Microsoft.Network/ipGroups', 'sqlservers')]",
+                "[resourceId('Microsoft.Network/ipGroups', 'appservers')]",
+                "[resourceId('Microsoft.Network/ipGroups', 'mgmtservers')]"
+            ],
+            "location": "[variables('location')]",
+            "name": "azfwpolicy/frompaloalto",
+            "properties": {
+                "priority": "10000",
+                "ruleCollections": [
+                    {
+                        "action": {
+                            "type": "allow"
+                        },
+                        "name": "from-pa-net-allow",
+                        "priority": "10910",
+                        "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
+                        "rules": [
+                            {
+                                "destinationAddresses": [],
+                                "destinationFqdns": [],
+                                "destinationIpGroups": [
+                                    "[resourceId('Microsoft.Network/ipGroups', 'sqlservers')]"
+                                ],
+                                "destinationPorts": [
+                                    "1433"
+                                ],
+                                "ipProtocols": [
+                                    "TCP"
+                                ],
+                                "name": "id1-app2db-1",
+                                "ruleType": "NetworkRule",
+                                "sourceAddresses": [],
+                                "sourceIpGroups": [
+                                    "[resourceId('Microsoft.Network/ipGroups', 'appservers')]"
+                                ]
+                            },
+                            {
+                                "destinationAddresses": [],
+                                "destinationFqdns": [],
+                                "destinationIpGroups": [
+                                    "[resourceId('Microsoft.Network/ipGroups', 'sqlservers')]"
+                                ],
+                                "destinationPorts": [
+                                    "22",
+                                    "161-162"
+                                ],
+                                "ipProtocols": [
+                                    "UDP",
+                                    "TCP"
+                                ],
+                                "name": "id2-mgmt2db-1",
+                                "ruleType": "NetworkRule",
+                                "sourceAddresses": [],
+                                "sourceIpGroups": [
+                                    "[resourceId('Microsoft.Network/ipGroups', 'mgmtservers')]"
+                                ]
+                            },
+                            {
+                                "destinationAddresses": [],
+                                "destinationFqdns": [],
+                                "destinationIpGroups": [
+                                    "[resourceId('Microsoft.Network/ipGroups', 'appservers')]"
+                                ],
+                                "destinationPorts": [
+                                    "22",
+                                    "161-162"
+                                ],
+                                "ipProtocols": [
+                                    "UDP",
+                                    "TCP"
+                                ],
+                                "name": "id2-mgmt2app-1",
+                                "ruleType": "NetworkRule",
+                                "sourceAddresses": [],
+                                "sourceIpGroups": [
+                                    "[resourceId('Microsoft.Network/ipGroups', 'mgmtservers')]"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "action": {
+                            "type": "deny"
+                        },
+                        "name": "from-pa-net-deny",
+                        "priority": "10900",
+                        "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
+                        "rules": []
+                    },
+                    {
+                        "action": {
+                            "type": "allow"
+                        },
+                        "name": "from-pa-app",
+                        "priority": "11000",
+                        "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
+                        "rules": []
+                    }
+                ]
+            },
+            "type": "Microsoft.Network/firewallPolicies/ruleCollectionGroups"
+        }
+    ],
+    "variables": {
+        "location": "[resourceGroup().location]"
+    }
+}

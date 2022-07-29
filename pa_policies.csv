@@ -1,0 +1,5 @@
+﻿,Name,Location,Tags,Type,Source Zone,Source Address,Source User,Source HIP Profile,Destination Zone,Destination Address,Application,Service,Action,Profile,Options,Target,Rule Usage Rule Usage,Rule Usage Apps Seen,Rule Usage Days With No New Apps,Modified,Created
+1,app2db,C2I_GLOBAL,INSIDE_IN,universal,C2I_INSIDE,appservers,any,any,C2I_OUTSIDE,sqlservers,any,SQL,Allow,none,Traffic log sent at session end;Log Forwarding Profile setting: GLOBAL_LOG_FORWARDING_PROFILE,any,Partially Used,89,12,4/19/2022 17:01,1/10/2022 10:48
+2,mgmt2db,C2I_GLOBAL,INSIDE_IN,universal,C2I_INSIDE,mgmtservers,any,any,C2I_OUTSIDE,sqlservers,any,Management,Allow,none,Traffic log sent at session end;Log Forwarding Profile setting: GLOBAL_LOG_FORWARDING_PROFILE,any,Partially Used,89,12,4/19/2022 17:01,1/10/2022 10:48
+2,mgmt2app,C2I_GLOBAL,INSIDE_IN,universal,C2I_INSIDE,mgmtservers,any,any,C2I_OUTSIDE,appservers,any,Management,Allow,none,Traffic log sent at session end;Log Forwarding Profile setting: GLOBAL_LOG_FORWARDING_PROFILE,any,Partially Used,89,12,4/19/2022 17:01,1/10/2022 10:48
+
