@@ -75,7 +75,7 @@ def ipgrp_used_by_rules(ipgrp_name, new_rules):
 def is_fqdn(str_var):
     # return bool(re.match(r"(?=^.{4,253}$)(^((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$)",str(str_var)))
     # Modified the regex above to only match on TLDs between 2 and 4 characters
-    return bool(re.match(r"(?=^.{4,253}$)(^((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,4}$)",str(str_var)))
+    return bool(re.match(r"(?=^.{4,253}$)(^((?!-))(xn--)?[a-z0-9][a-z0-9-_]{0,61}[a-z0-9]{0,1}\.(xn--)?([a-z0-9\-]{1,61}|[a-z0-9-]{1,30}\.[a-z]{2,})$)",str(str_var)))
 
 # Returns correct CIDR. For exmample:
 #   correct_cidr('192.168.0.1/24') = '192.168.0.0/24'
