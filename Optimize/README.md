@@ -26,7 +26,16 @@ optional arguments:
   --verbose             run in verbose mode (default: False)
   ```
   
-Second, you can provide the JSON-based Azure Firewall Policy for analysis and see the results:
+You can generate a JSON file containing the ARM definition of your Azure Firewall Policy via the portal, or with the PowerShell or Azure CLI. Here a example with the latter:
+
+```bash
+rg=yourresourcegroup
+azfw_policy_name=yourpolicyname
+azfw_policy_id=$(az network firewall policy show -n $azfw_policy_name -g $rg --query id -o tsv)                                                                
+az group export -g $rg --resource-ids $azfw_policy_id -o json >policy_sample.json
+```
+
+You can provide the JSON-based Azure Firewall Policy for analysis and see the results:
   
 ```
 (base)> python ./inspect_policy.py --file ./2022-01-12T12_35_11.json
