@@ -1,3 +1,5 @@
+> # WORK IN PROGRESS
+
 # Optimizing an existing Firewall Policy
 
 [inspect_policy.py](./inspect_policy.py) analyzes an existing Azure Firewall Policy in JSON format (this can be obtained exporting the Azure Firewall Policy from the portal), and then running the script. The output will contain high level information about optimization possibilities by adding IP Groups (and hence reducing the total amount of IP objects that the Azure Firewall Policy consumes).
