@@ -1,0 +1,109 @@
+[
+  {
+    "etag": "f9b5c91d-1aec-4edd-94ff-9616fe24c494",
+    "id": "/subscriptions/e7da9914-9b05-4891-893c-546cb7b0422e/resourcegroups/fwpolicy/providers/Microsoft.Network/firewallPolicies/azfwpolicy2/ruleCollectionGroups/DefaultNetworkRuleCollectionGroup",
+    "name": "DefaultNetworkRuleCollectionGroup",
+    "priority": 200,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "fwpolicy",
+    "ruleCollections": [
+      {
+        "action": {
+          "type": "Allow"
+        },
+        "name": "netRC",
+        "priority": 1000,
+        "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
+        "rules": [
+          {
+            "destinationAddresses": [
+              "10.0.0.0/24"
+            ],
+            "destinationFqdns": [],
+            "destinationIpGroups": [],
+            "destinationPorts": [
+              "3333"
+            ],
+            "ipProtocols": [
+              "TCP"
+            ],
+            "name": "rule1",
+            "ruleType": "NetworkRule",
+            "sourceAddresses": [
+              "10.0.0.0/24"
+            ],
+            "sourceIpGroups": []
+          },
+          {
+            "destinationAddresses": [
+              "30.0.0.0/24"
+            ],
+            "destinationFqdns": [],
+            "destinationIpGroups": [],
+            "destinationPorts": [
+              "*"
+            ],
+            "ipProtocols": [
+              "Any"
+            ],
+            "name": "rule2",
+            "ruleType": "NetworkRule",
+            "sourceAddresses": [
+              "30.0.0.0/24"
+            ],
+            "sourceIpGroups": []
+          }
+        ]
+      }
+    ],
+    "type": "Microsoft.Network/FirewallPolicies/RuleCollectionGroups"
+  },
+  {
+    "etag": "3e66e4df-fb51-416a-88a8-bf8e948f4f39",
+    "id": "/subscriptions/e7da9914-9b05-4891-893c-546cb7b0422e/resourcegroups/fwpolicy/providers/Microsoft.Network/firewallPolicies/azfwpolicy2/ruleCollectionGroups/DefaultApplicationRuleCollectionGroup",
+    "name": "DefaultApplicationRuleCollectionGroup",
+    "priority": 300,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "fwpolicy",
+    "ruleCollections": [
+      {
+        "action": {
+          "type": "Allow"
+        },
+        "name": "appRC",
+        "priority": 2000,
+        "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
+        "rules": [
+          {
+            "destinationAddresses": [],
+            "fqdnTags": [],
+            "httpHeadersToInsert": [],
+            "name": "rule01",
+            "protocols": [
+              {
+                "port": 80,
+                "protocolType": "Http"
+              },
+              {
+                "port": 443,
+                "protocolType": "Https"
+              }
+            ],
+            "ruleType": "ApplicationRule",
+            "sourceAddresses": [
+              "*"
+            ],
+            "sourceIpGroups": [],
+            "targetFqdns": [
+              "*.blob.azure.net"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "webCategories": []
+          }
+        ]
+      }
+    ],
+    "type": "Microsoft.Network/FirewallPolicies/RuleCollectionGroups"
+  }
+]
